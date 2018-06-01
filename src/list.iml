@@ -1,0 +1,9 @@
+
+(** {1 List} *)
+
+type 'a t = 'a List.t
+
+theorem rev_involutive l = List.rev (List.rev l) = l
+[@@induct] [@@rewrite]
+;;
+

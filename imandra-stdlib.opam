@@ -1,0 +1,24 @@
+opam-version: "1.2"
+name: "imandra-stdlib"
+version: "0.1"
+authors: ["Grant Passmore" "Simon Cruanes"]
+maintainer: "simon@aestheticintegration.com"
+license: "BSD-2-clauses"
+build: [
+]
+install: [make "install"]
+remove: [
+    ["ocamlfind" "remove" name]
+]
+depends: [
+  "ocamlfind" {build}
+  "imandra"
+]
+homepage: "https://github.com/AestheticIntegration/imandra-stdlib"
+depopts: [
+  "base-bigarray"
+]
+doc: "https://AestheticIntegration.github.io/imandra-stdlib/"
+bug-reports: "https://github.com/AestheticIntegration/imandra-stdlib/issues"
+dev-repo: "https://github.com/AestheticIntegration/imandra-stdlib.git"
+
