@@ -1,4 +1,5 @@
 
 (** {1 Entry point} *)
 
-System.mod_use "stdlib_list.iml";;
+[@@@import "stdlib_list.iml"]
+
