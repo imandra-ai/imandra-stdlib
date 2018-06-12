@@ -7,3 +7,8 @@ theorem rev_involutive l = List.rev (List.rev l) = l
 [@@induct] [@@rewrite]
 ;;
 
+
+theorem range_length x y =
+  x < y ==> List.length List.(x -- y) = y-x
+  [@@induct functional List.(--)] [@@rw]
+;;
