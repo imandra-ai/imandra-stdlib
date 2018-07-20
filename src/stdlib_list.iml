@@ -7,8 +7,17 @@ theorem rev_involutive l = List.rev (List.rev l) = l
 [@@induct] [@@rewrite]
 ;;
 
-
 theorem range_length x y =
   x < y ==> List.length List.(x -- y) = y-x
   [@@induct functional List.(--)] [@@rw]
+;;
+
+theorem append_length a b =
+  List.length (a@b) = List.length a + List.length b
+  [@@induct] [@@rw]
+;;
+
+lemma append_id x =
+  x @ [] = x
+  [@@induct] [@@rw]
 ;;
