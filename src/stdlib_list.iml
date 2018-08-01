@@ -21,3 +21,21 @@ lemma append_id x =
   x @ [] = x
   [@@induct] [@@rw]
 ;;
+
+theorem forall_map f g l =
+  List.for_all f (List.map g l) = List.for_all (fun x -> f (g x)) l
+[@@induct]
+[@@rw]
+;;
+
+theorem forall_filter f g l =
+  List.for_all f (List.filter g l) = List.for_all (fun x -> g x ==> f x) l
+[@@induct l]
+[@@rw]
+;;
+
+theorem exist_map f g l =
+  List.exists f (List.map g l) = List.exists (fun x -> f (g x)) l
+[@@induct]
+[@@rw]
+;;
