@@ -12,13 +12,8 @@ remove: [
 ]
 depends: [
   "ocamlfind" {build}
-  "imandra"
 ]
 homepage: "https://github.com/AestheticIntegration/imandra-stdlib"
-depopts: [
-  "base-bigarray"
-]
 doc: "https://AestheticIntegration.github.io/imandra-stdlib/"
 bug-reports: "https://github.com/AestheticIntegration/imandra-stdlib/issues"
 dev-repo: "https://github.com/AestheticIntegration/imandra-stdlib.git"
-
