@@ -3,39 +3,53 @@
 
 type 'a t = 'a List.t
 
-theorem rev_involutive l = List.rev (List.rev l) = l
-[@@induct] [@@rewrite]
+theorem rev_rev_id x = List.rev (List.rev x) = x
+  [@@auto] [@@rw]
 ;;
 
-theorem range_length x y =
+theorem rev_empty x =
+  (List.rev x = []) = (x = [])
+  [@@auto] [@@rw]
+;;
+
+theorem rev_len x =
+  List.length (List.rev x) = List.length x
+  [@@auto] [@@rw]
+;;
+
+theorem rev_append x y =
+  List.rev (x @ y) = List.rev y @ List.rev x
+  [@@auto] [@@rw]
+;;
+
+theorem range_len x y =
   x < y ==> List.length List.(x -- y) = y-x
-  [@@induct functional List.(--)] [@@rw]
+  [@@auto] [@@rw]
 ;;
 
-theorem append_length a b =
-  List.length (a@b) = List.length a + List.length b
-  [@@induct] [@@rw]
+theorem append_len a b =
+  List.length (a @ b) = List.length a + List.length b
+  [@@auto] [@@rw]
 ;;
 
 lemma append_id x =
   x @ [] = x
-  [@@induct] [@@rw]
+  [@@auto] [@@rw]
 ;;
 
 theorem forall_map f g l =
   List.for_all f (List.map g l) = List.for_all (fun x -> f (g x)) l
-[@@induct]
-[@@rw]
+  [@@auto] [@@rw]
 ;;
 
 theorem forall_filter f g l =
   List.for_all f (List.filter g l) = List.for_all (fun x -> g x ==> f x) l
-[@@induct l]
-[@@rw]
+ [@@auto]
+ [@@rw]
 ;;
 
 theorem exist_map f g l =
   List.exists f (List.map g l) = List.exists (fun x -> f (g x)) l
-[@@induct]
-[@@rw]
+  [@@auto]
+  [@@rw]
 ;;
