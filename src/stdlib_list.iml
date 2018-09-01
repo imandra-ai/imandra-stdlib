@@ -21,7 +21,7 @@ lemma append_elim x y a b =
 
 lemma rev_elim x y =
  (List.rev x = List.rev y) = (x = y)
-[@@induct x,y]
+[@@induct x,y] [@@rw]
 ;;
 
 lemma rev_append x y =
@@ -55,12 +55,10 @@ lemma forall_map f g l =
 
 lemma forall_filter f g l =
   List.for_all f (List.filter g l) = List.for_all (fun x -> g x ==> f x) l
- [@@auto]
- [@@rw]
+ [@@auto] [@@rw]
 ;;
 
 lemma exist_map f g l =
   List.exists f (List.map g l) = List.exists (fun x -> f (g x)) l
-  [@@auto]
-  [@@rw]
+  [@@auto] [@@rw]
 ;;
