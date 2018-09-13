@@ -3,14 +3,19 @@
 
 type 'a t = 'a List.t
 
+lemma append_assoc x y z =
+  x @ (y @ z) = (x @ y) @ z
+[@@auto] [@@rw]
+;;
+
 lemma append_id x =
   x @ [] = x
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma append_len a b =
   List.length (a @ b) = List.length a + List.length b
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma append_elim x y a b =
@@ -26,39 +31,40 @@ lemma rev_elim x y =
 
 lemma rev_append x y =
   List.rev (x @ y) = List.rev y @ List.rev x
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
-lemma rev_rev_id x = List.rev (List.rev x) = x
-  [@@auto] [@@rw]
+lemma rev_rev_id x =
+  List.rev (List.rev x) = x
+[@@auto] [@@rw]
 ;;
 
 lemma rev_empty x =
   (List.rev x = []) = (x = [])
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma rev_len x =
   List.length (List.rev x) = List.length x
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma range_len x y =
   x < y ==> List.length List.(x -- y) = y-x
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma forall_map f g l =
   List.for_all f (List.map g l) = List.for_all (fun x -> f (g x)) l
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma forall_filter f g l =
   List.for_all f (List.filter g l) = List.for_all (fun x -> g x ==> f x) l
- [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
 
 lemma exist_map f g l =
   List.exists f (List.map g l) = List.exists (fun x -> f (g x)) l
-  [@@auto] [@@rw]
+[@@auto] [@@rw]
 ;;
