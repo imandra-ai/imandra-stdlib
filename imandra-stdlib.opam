@@ -1,5 +1,6 @@
-opam-version: "1.2"
+opam-version: "2.0"
 name: "imandra-stdlib"
+synopsis: "This library contains source files for basic data structures and algorithms for Imandra"
 version: "0.1"
 authors: ["Grant Passmore" "Simon Cruanes"]
 maintainer: "simon@aestheticintegration.com"
@@ -16,4 +17,4 @@ depends: [
 homepage: "https://github.com/AestheticIntegration/imandra-stdlib"
 doc: "https://AestheticIntegration.github.io/imandra-stdlib/"
 bug-reports: "https://github.com/AestheticIntegration/imandra-stdlib/issues"
-dev-repo: "https://github.com/AestheticIntegration/imandra-stdlib.git"
+dev-repo: "git+https://github.com/AestheticIntegration/imandra-stdlib.git"
