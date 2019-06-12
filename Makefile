@@ -1,14 +1,11 @@
 
 all:
+	@dune build @install
 
-LIBNAME=imandra-stdlib
-TO_INSTALL=$(shell find src -name '*.iml')
-
-install:
-	ocamlfind install $(LIBNAME) META $(TO_INSTALL)
+install: all
+	@dune install
 
 uninstall:
-	ocamlfind remove $(LIBNAME)
+	@dune uninstall
 
-
-.PHONY: all install
+.PHONY: all install uninstall

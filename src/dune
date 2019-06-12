@@ -1,0 +1,7 @@
+(library
+ (name imandra_stdlib)
+ (public_name imandra-stdlib))
+
+(install
+ (section lib)
+ (files imandra-stdlib.iml stdlib_list.iml))
