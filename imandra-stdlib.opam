@@ -6,13 +6,10 @@ authors: ["Grant Passmore" "Simon Cruanes"]
 maintainer: "simon@aestheticintegration.com"
 license: "BSD-2-clauses"
 build: [
-]
-install: [make "install"]
-remove: [
-    ["ocamlfind" "remove" name]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocamlfind" {build}
+  "dune" {build}
 ]
 homepage: "https://github.com/AestheticIntegration/imandra-stdlib"
 doc: "https://AestheticIntegration.github.io/imandra-stdlib/"
