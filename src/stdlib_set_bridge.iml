@@ -1,0 +1,57 @@
+(** {1 Set_bridge}
+
+   A simple bridge between Imandra Set.t values and lists, using
+   projection via explicit list-based `universes'.
+
+   G.Passmore, Imandra
+ *)
+
+type 'a universe = 'a list
+
+let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
+  match u with
+  | [] -> []
+  | x :: xs ->
+    if Set.mem x s then (
+      x :: (to_list xs s)
+    ) else (
+      to_list xs s
+    )
+
+(* The fundamental lemma for projection into a universe *)
+
+lemma mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+  List.mem x (to_list u s) = (Set.mem x s && List.mem x u)
+[@@auto] [@@rw]
+
+(* Bridged size / cardinality *)
+
+let size (u : 'a universe) (s : 'a Set.t) =
+  List.length (to_list u s)
+
+lemma size_psd (u : 'a universe) (a : 'a Set.t) =
+  size u a >= 0
+[@@auto] [@@fc]
+
+lemma size_union (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+  size u (Set.union a b) = size u a + size u b - size u (Set.inter a b)
+[@@auto] [@@rw]
+
+lemma size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+  (size u (Set.inter a b)) [@trigger] = size u a + size u b - size u (Set.union a b)
+[@@auto]
+
+lemma size_union_ub (u : 'a list) (a : 'a Set.t) (b : 'a Set.t) =
+  size u (Set.union a b) <= size u a + size u b
+[@@auto] [@@fc]
+
+lemma size_inter_ub (u : 'a list) (a : 'a Set.t) (b : 'a Set.t) =
+  size u (Set.inter a b) <= size u a + size u b
+[@@auto] [@@apply size_inter u a b] [@@fc]
+
+lemma size_inter_lt_union u a b =
+  size u (Set.inter a b) <= size u (Set.union a b)
+[@@apply size_inter u a b]
+[@@auto]
+
+[@@@disable size]
