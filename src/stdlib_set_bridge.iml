@@ -41,17 +41,35 @@ lemma size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   (size u (Set.inter a b)) [@trigger] = size u a + size u b - size u (Set.union a b)
 [@@auto]
 
-lemma size_union_ub (u : 'a list) (a : 'a Set.t) (b : 'a Set.t) =
+lemma size_union_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) <= size u a + size u b
 [@@auto] [@@fc]
 
-lemma size_inter_ub (u : 'a list) (a : 'a Set.t) (b : 'a Set.t) =
+lemma size_inter_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.inter a b) <= size u a + size u b
 [@@auto] [@@apply size_inter u a b] [@@fc]
 
 lemma size_inter_lt_union u a b =
   size u (Set.inter a b) <= size u (Set.union a b)
-[@@apply size_inter u a b]
-[@@auto]
+[@@auto] [@@apply size_inter u a b] [@@rw]
+
+lemma size_empty (u : 'a universe) (s : 'a Set.t) =
+  Set.is_empty s ==> size u s = 0
+[@@auto] [@@rw]
+
+(* Note: we don't have `_ = size u s + 1` as universes may have duplicates! *)
+lemma size_add_fresh (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+  not (Set.mem x s) && List.mem x u ==> size u (Set.add x s) > size u s
+[@@auto] [@@rw]
+
+lemma size_add_eq (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+  Set.mem x s && List.mem x u ==> size u (Set.add x s) = size u s
+[@@auto] [@@rw]
+
+(*
+lemma size_diff u a b =
+  size u (Set.diff a b) = size u a - size u (Set.inter a b)
+[@@auto] [@@rw]
+*)
 
 [@@@disable size]
