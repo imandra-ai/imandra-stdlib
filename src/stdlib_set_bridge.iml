@@ -17,17 +17,18 @@ let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
     ) else (
       to_list xs s
     )
+;;
 
 (* Note: It'd also be interesting to develop a version of
    `to_list` which enforces non-duplication through a
-   `seen` set. Still, most laws hold naturally even in 
+   `seen` set. Still, most laws hold naturally even in
    the presense of duplication in universes. *)
 
 (* The fundamental lemma for projection into a universe *)
 
 lemma mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   List.mem x (to_list u s) = (Set.mem x s && List.mem x u)
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 (* A choice function *)
 
@@ -35,95 +36,95 @@ let choose (u : 'a universe) (s : 'a Set.t) : 'a option =
   match to_list u s with
   | [] -> None
   | x :: _ -> Some x
+;;
 
 lemma choose_mem (u : 'a universe) (s : 'a Set.t) =
   match choose u s with
   | None -> true
   | Some x -> Set.mem x s
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 lemma choose_empty (u : 'a universe) (s : 'a Set.t) (x : 'a) =
   choose u s = None
   && List.mem x u
   ==>
   not (Set.mem x s)
-[@@auto]
+[@@auto] ;;
 
 (* Algebraic laws of membership - all automatic via
    our u-projective workhorse, `mem_to_list`! *)
 
 lemma mem_union u x a b =
   List.mem x (to_list u @@ Set.union a b)
-  = (List.mem x u 
+  = (List.mem x u
      && (Set.mem x a || Set.mem x b))
-[@@auto]
+[@@auto] ;;
 
 lemma mem_inter u x a b =
   List.mem x (to_list u @@ Set.inter a b)
-  = (List.mem x u 
+  = (List.mem x u
      && (Set.mem x a && Set.mem x b))
-[@@auto]
+[@@auto] ;;
 
 lemma mem_diff u x a b =
   List.mem x (to_list u @@ Set.diff a b)
-  = (List.mem x u 
+  = (List.mem x u
      && (Set.mem x a && not (Set.mem x b)))
-[@@auto]
+[@@auto] ;;
 
 (* Bridged size / cardinality *)
 
-let size (u : 'a universe) (s : 'a Set.t) =
-  List.length (to_list u s)
+let size (u : 'a universe) (s : 'a Set.t) = List.length (to_list u s) ;;
 
 lemma size_psd (u : 'a universe) (a : 'a Set.t) =
   size u a >= 0
-[@@auto] [@@fc]
+[@@auto] [@@fc] ;;
 
 lemma size_union (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) = size u a + size u b - size u (Set.inter a b)
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 lemma size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   (size u (Set.inter a b)) [@trigger] = size u a + size u b - size u (Set.union a b)
-[@@auto]
+[@@auto] ;;
 
 lemma size_union_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) <= size u a + size u b
-[@@auto] [@@fc]
+[@@auto] [@@fc] ;;
 
 lemma size_inter_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.inter a b) <= size u a + size u b
-[@@auto] [@@apply size_inter u a b] [@@fc]
+[@@auto] [@@apply size_inter u a b] [@@fc] ;;
 
 lemma size_inter_lt_union u a b =
   size u (Set.inter a b) <= size u (Set.union a b)
-[@@auto] [@@apply size_inter u a b] [@@rw]
+[@@auto] [@@apply size_inter u a b] [@@rw] ;;
 
 lemma size_empty (u : 'a universe) (s : 'a Set.t) =
   Set.is_empty s ==> size u s = 0
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 (* Note: we don't have `_ = size u s + 1` as universes may have duplicates! *)
 lemma size_add_fresh (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   not (Set.mem x s) && List.mem x u ==> size u (Set.add x s) > size u s
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 lemma size_add_eq (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   Set.mem x s && List.mem x u ==> size u (Set.add x s) = size u s
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 lemma size_diff u a b =
   size u (Set.diff a b) = size u a - size u (Set.inter a b)
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
 (* The size of a 'projected' set is always bounded by the
    size of its universe. *)
 
 lemma size_bounded u a =
   size u a <= List.length u
-[@@auto] [@@rw]
+[@@auto] [@@rw] ;;
 
-[@@@disable size]
+[@@@disable size] ;;
 
 (* Some nice concrete examples showing automatic use of the
    bridge *)
@@ -138,29 +139,29 @@ verify (fun s s' ->
   List.mem 3 (to_list u @@ Set.inter (Set.add 3 s) (Set.add 3 s'))
 )
 
-(* Note: We get a super cool counterexample below if we forget the 
+(* Note: We get a super cool counterexample below if we forget the
    `List.mem x u` hypothesis! The CX takes us `out of the Universe!' *)
 
 verify (fun s s' x ->
   let u = [0;1;2;3;4;5;6;7;8;9] in
-  Set.mem x s && Set.mem x s' && List.mem x u 
+  Set.mem x s && Set.mem x s' && List.mem x u
   ==> List.mem x (to_list u @@ Set.inter s s')
 )
 
 verify (fun u s s' x ->
-  Set.mem x s && Set.mem x s' && List.mem x u 
+  Set.mem x s && Set.mem x s' && List.mem x u
   ==> List.mem x (to_list u @@ Set.inter s s')
 ) [@@auto]
 
 verify (fun u s s' x ->
   List.mem x (to_list u Set.(inter s s'))
-   = (List.mem x (to_list u s) && 
+   = (List.mem x (to_list u s) &&
       List.mem x (to_list u s'))
 ) [@@auto]
 
 verify (fun u a b x ->
   let to_list = to_list u in
-  Set.subset a b 
+  Set.subset a b
   && List.mem x (to_list a)
   ==>
   List.mem x (to_list b)
@@ -168,7 +169,7 @@ verify (fun u a b x ->
 
 verify (fun u a b c d x y ->
   let to_list = to_list u in
-  Set.subset a b 
+  Set.subset a b
   && Set.subset (Set.remove y b) (Set.inter c (Set.diff d a))
   && List.mem x (to_list a)
   ==>
