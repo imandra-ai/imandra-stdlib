@@ -3,6 +3,6 @@
 
 [@@@import "stdlib_list.iml"]
 [@@@import "stdlib_lstring.iml"]
-[@@@import "stdlib_set_bridge.iml"]
+(* [@@@import "stdlib_set_bridge.iml"]*)
 
 open Stdlib_lstring;;
