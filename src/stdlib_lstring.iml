@@ -1,0 +1,190 @@
+
+
+(** {1 Logic mode char}
+
+    An 8-bit char. *)
+module LChar = struct
+  type t = Char of bool*bool*bool*bool*bool*bool*bool*bool
+
+  let zero : t = Char (false,false,false,false,false,false,false,false)
+
+  let to_int (c:t) : Caml.Int.t =
+    let open Caml.Int in
+    let Char (a7,a6,a5,a4,a3,a2,a1,a0) = c in
+    let (!) x = if x then 1i else 0i in
+    (!a7 lsl 7i) +
+    (!a6 lsl 6i) +
+    (!a5 lsl 5i) +
+    (!a4 lsl 4i) +
+    (!a3 lsl 3i) +
+    (!a2 lsl 2i) +
+    (!a1 lsl 1i) +
+    (!a0 lsl 0i)
+  [@@program]
+
+  let of_int (i:Caml.Int.t) : t =
+    assert Caml.Int.(i >= 0i && i < 128i);
+    let (!) x = Caml.Int.( x<> 0i ) in
+    let a7 = ! (i land (1i lsl 7i)) in
+    let a6 = ! (i land (1i lsl 6i)) in
+    let a5 = ! (i land (1i lsl 5i)) in
+    let a4 = ! (i land (1i lsl 4i)) in
+    let a3 = ! (i land (1i lsl 3i)) in
+    let a2 = ! (i land (1i lsl 2i)) in
+    let a1 = ! (i land (1i lsl 1i)) in
+    let a0 = ! (i land (1i lsl 0i)) in
+    Char (a7,a6,a5,a4,a3,a2,a1,a0)
+  [@@program]
+
+  let of_char (c:char) : t = of_int (Caml.Char.code c) [@@program];;
+
+  let to_char (c:t) : char = Caml.Char.chr (to_int c) [@@program];;
+
+  let print out c = Format.fprintf out "'%c'" (to_char c) [@@program];;
+
+  let explode (s: string) : t list =
+    let l = ref [] in
+    Caml.String.iter (fun c -> l := of_char c :: !l) s;
+    List.rev !l
+    [@@program]
+end ;;
+
+#install_printer LChar.print;;
+
+(** {2 Logic-mode strings}
+
+    Strings purely in imandra. *)
+module LString = struct
+  type t = LChar.t list
+
+  let empty : t = []
+
+  let of_list l = l
+
+  (* str.len *)
+  let rec length (s:t) : int =
+    match s with
+    | [] -> 0
+    | _ :: tl -> 1 + length tl
+
+  let print out l =
+    Format.fprintf out "[@[<hov>%a@]]" (CCList.pp LChar.print) l [@@program]
+
+    (* TODO
+  lemma len_pos (s:t) =
+    length s [@trigger] >= 0 [@@auto] [@@fc]
+
+  lemma len_zero_inversion (s:t) =
+    length s [@trigger] = 0 ==> s = []
+  [@@auto] [@@fc]
+  *)
+
+    (*
+  let rec make i c =
+    if Caml.Int.(i<=0i) then [] else c :: make Caml.Int.(i-1i) c
+  [@@program]
+
+  let rec get s i =
+    if i
+    *)
+
+  (* str.append *)
+  let rec append (s1:t) (s2:t) : t =
+    match s1 with
+    | [] -> s2
+    | c :: s1' -> c :: append s1' s2
+
+  let rec concat sep = function
+    | [] -> []
+    | [s] -> s
+    | s1 :: tl -> append s1 (append sep (concat sep tl))
+
+  (* "unsafe" sub (returns [empty] if out of range) *)
+  let rec sub (s:t) (i:int) (len:int) : t =
+    match s with
+    | [] -> []
+    | c1 :: s' ->
+      if len <= 0 then []
+      else if i <= 0 then (
+        c1 :: sub s' 0 (len-1)
+      ) else (
+        sub s' (i-1) len
+      )
+
+  let rec prefix (s1:t) (s2:t) : bool =
+    match s1 with
+    | [] -> true
+    | c1 :: s1' ->
+      match s2 with
+      | [] -> false
+      | c2 :: s2' -> c1 = c2 && prefix s1' s2'
+
+  let rec suffix (s1:t) (s2:t) : bool =
+    s1 = s2 ||
+    match s2 with
+    | [] -> false
+    | _ :: s2' -> suffix s1 s2'
+
+  let rec contains ~sub:(s1:t) (s2:t) : bool =
+    match s1 with
+    | [] -> true
+    | c1 :: s1' ->
+      match s2 with
+      | [] -> false
+      | c2 :: s2' ->
+        (c1 = c2 && contains ~sub:s1' s2') || contains ~sub:s1 s2'
+  [@@adm s2]
+
+  (** [take n l] returns a list composed of the first (at most) [n] elements
+      of [l]. If [length l <= n] then it returns [l] *)
+  let rec take n : t -> t = function
+    | [] -> []
+    | _ when n<=0 -> []
+    | x :: tl -> x :: take (n-1) tl
+  [@@adm 1n]
+
+  (** [drop n l] returns [l] where the first (at most) [n] elements
+      have been removed. If [length l <= n] then it returns [[]] *)
+  let rec drop n : t -> t = function
+    | [] -> []
+    | l when n<=0 -> l
+    | _ :: tl -> drop (n-1) tl
+  [@@adm 0n]
+
+  (*
+  (* TODO *)
+  let unsafe_to_nat x = 0
+  *)
+end;;
+#install_printer LString.print;;
+
+Imandra.add_custom_extension_string_lit "l"
+  (fun ~self_expr:_ s ->
+    let open Imandra.Custom_extension_point in
+    let open U in
+
+    (* turn ['a'] into [LChar.Char (…)] *)
+    let mk_expr_bools_of_char (c:char) : expression =
+      let i = Caml.Char.code c in
+      let open Caml.Int in
+      assert (i >= 0i && i < 128i);
+      let (!) x = ( x<> 0i ) in
+      let a7 = mk_bool @@ !(i land (1i lsl 7i)) in
+      let a6 = mk_bool @@ !(i land (1i lsl 6i)) in
+      let a5 = mk_bool @@ !(i land (1i lsl 5i)) in
+      let a4 = mk_bool @@ !(i land (1i lsl 4i)) in
+      let a3 = mk_bool @@ !(i land (1i lsl 3i)) in
+      let a2 = mk_bool @@ !(i land (1i lsl 2i)) in
+      let a1 = mk_bool @@ !(i land (1i lsl 1i)) in
+      let a0 = mk_bool @@ !(i land (1i lsl 0i)) in
+      H.Exp.construct (mk_id "Stdlib_lstring.LChar.Char")
+        (Some (H.Exp.tuple [a7;a6;a5;a4;a3;a2;a1;a0]))
+    in
+
+    (* compile into [LString.of_list …] *)
+    let l = List.map mk_expr_bools_of_char (CCString.to_list s) in
+    let e = mk_expr_list l in
+    mk_apply_id (mk_id "Stdlib_lstring.LString.of_list") [e]
+    )
+[@@program]
+;;
