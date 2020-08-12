@@ -49,7 +49,7 @@ module LChar = struct
     [@@program]
 end ;;
 
-#install_printer LChar.print;;
+[@@@install_printer LChar.print];;
 
 (** {2 Logic-mode strings}
 
@@ -156,7 +156,7 @@ module LString = struct
   let unsafe_to_nat x = 0
   *)
 end;;
-#install_printer LString.print;;
+[@@@install_printer LString.print];;
 
 Imandra.add_custom_extension_string_lit "l"
   (fun ~self_expr:_ s ->
