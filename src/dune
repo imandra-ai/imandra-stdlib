@@ -4,4 +4,4 @@
 
 (install
  (section lib)
- (files imandra-stdlib.iml stdlib_list.iml))
+ (files imandra-stdlib.iml stdlib_list.iml stdlib_set_bridge.iml))
