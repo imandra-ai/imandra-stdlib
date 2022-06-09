@@ -1,0 +1,82 @@
+(* The `floor' of a real number, and its use in proving termination
+   of functions doing recursion over reals, in answer to a question
+   of Remi Desmartin.
+
+   G.Passmore, Imandra
+ *)
+
+(* Floor by `counting up.' Note how we get to assume floor's existence in its
+   measure, as we only depend on it for `smaller' instances in the admission!
+
+   Also note that this is a function designed principally for reasoning, rather
+   than efficient computation! However, a `bridge' of this form is really
+   necessary to connect the (continuous) world of reals to the discrete world of
+   ints, with a suitable induction principle.
+ *)
+
+let rec floor (x:real) (base:int) : int =
+  if Real.(x <= 0.0) then 0
+  else (
+    let r = Real.of_int base in
+    if r = x then base
+    else if Real.(r > x) then (base-1)
+    else floor x (base+1)
+  )
+[@@measure Ordinal.of_int (floor x base - base)]
+[@@auto]
+
+(* Real->Int conversion for `psd' (i.e., >=0) reals *)
+
+let int_of_real_psd (x:real) : int =
+  floor x 0
+
+let rec int_induct n =
+  if n <= 0 then 0
+  else int_induct (n-1)
+
+lemma floor_psd x y =
+  floor x y >= 0
+[@@induct_term int_induct y] [@@rw] [@@fc]
+
+lemma floor_mono x y b =
+  Real.(x <= y && x >= 0. && y >= 0.) ==> floor x b <= floor y b
+[@@induct_term int_induct b] [@@rw] [@@fc]
+
+lemma int_of_real_psd_psd x =
+  int_of_real_psd x >= 0
+[@@auto] [@@rw] [@@fc]
+
+lemma int_of_real_psd_mono x y =
+  Real.(x <= y && x >= 0. && y >= 0.) ==> (int_of_real_psd x <= int_of_real_psd y) [@trigger]
+[@@auto] [@@apply floor_mono x y 0] [@@rw] [@@fc]
+
+lemma inc_by_one_bigger_floor x b =
+  Real.(x >= 0. && Real.of_int b <= x) ==> floor Real.(x + 1.0) b > floor x b
+[@@auto] [@@rw] [@@fc]
+
+lemma inc_by_one_bigger_conv x =
+  Real.(x >= 0.) ==> int_of_real_psd Real.(x + 1.0) > ((int_of_real_psd x) [@trigger])
+[@@apply inc_by_one_bigger_floor x 0] [@@auto] [@@fc]
+
+[@@@disable int_of_real_psd]
+
+(* Ex. we can use this to admit functions recursing on reals!
+   Note we add the explicit additional termination condition of
+   `(i < 0. || j < 0.)' as we want to keep everything PSD. *)
+
+(* let rec example (i:real) (j:real) =
+ *   let open Real in
+ *   let dec i j =
+ *     if j <= 0. then (i-1.,j) else (i,j-1.)
+ *   in
+ *   if (i <= 0. && j <= 0.) || (i < 0. || j < 0.) then (
+ *     1.
+ *   ) else (
+ *     let i', j' = dec i j in
+ *     example i' j'
+ *   )
+ * [@@measure
+ *   Ordinal.pair
+ *     (Ordinal.of_int (int_of_real_psd i))
+ *     (Ordinal.of_int (int_of_real_psd j))]
+ * [@@auto] *)

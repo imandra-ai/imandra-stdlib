@@ -131,78 +131,78 @@ lemma size_bounded u a =
 (* Some nice concrete examples showing automatic use of the
    bridge *)
 
-verify (
-  let u = [0;1;2;3;4;5;6;7;8;9] in
-  to_list u @@ (Set.add 7 (Set.of_list [1;2;3])) = [1;2;3;7]
-);;
-
-verify (fun s s' ->
-  let u = [0;1;2;3;4;5;6;7;8;9] in
-  List.mem 3 (to_list u @@ Set.inter (Set.add 3 s) (Set.add 3 s'))
-);;
+(* verify (
+ *   let u = [0;1;2;3;4;5;6;7;8;9] in
+ *   to_list u @@ (Set.add 7 (Set.of_list [1;2;3])) = [1;2;3;7]
+ * );;
+ *
+ * verify (fun s s' ->
+ *   let u = [0;1;2;3;4;5;6;7;8;9] in
+ *   List.mem 3 (to_list u @@ Set.inter (Set.add 3 s) (Set.add 3 s'))
+ * );; *)
 
 (* Note: We get a super cool counterexample below if we forget the
    `List.mem x u` hypothesis! The CX takes us `out of the Universe!' *)
 
-verify (fun s s' x ->
-  let u = [0;1;2;3;4;5;6;7;8;9] in
-  Set.mem x s && Set.mem x s' && List.mem x u
-  ==> List.mem x (to_list u @@ Set.inter s s')
-);;
-
-verify (fun u s s' x ->
-  Set.mem x s && Set.mem x s' && List.mem x u
-  ==> List.mem x (to_list u @@ Set.inter s s')
-) [@@auto] ;;
-
-verify (fun u s s' x ->
-  List.mem x (to_list u Set.(inter s s'))
-   = (List.mem x (to_list u s) &&
-      List.mem x (to_list u s'))
-) [@@auto];;
-
-verify (fun u a b x ->
-  let to_list = to_list u in
-  Set.subset a b
-  && List.mem x (to_list a)
-  ==>
-  List.mem x (to_list b)
-) [@@auto] ;;
-
-verify (fun u a b c d x y ->
-  let to_list = to_list u in
-  Set.subset a b
-  && Set.subset (Set.remove y b) (Set.inter c (Set.diff d a))
-  && List.mem x (to_list a)
-  ==>
-  x = y
-) [@@auto] ;;
-
-verify (fun u a b c d x y ->
-  let to_list = to_list u in
-  Set.subset a b && Set.subset b c
-  && Set.subset c d
-  && List.mem x (to_list a)
-  && y >= x && x >= y
-  ==>
-  List.mem y (to_list d)
-) [@@auto]
-
-verify (fun u a b c d x y ->
-  let to_list = to_list u in
-  Set.subset a b && Set.subset b c
-  && Set.subset c d
-  && List.mem x (to_list a)
-  && y < x+1 && y > x-1
-  ==>
-  List.mem y (to_list d)
-) [@@auto];;
-
-verify (fun u u' a b c x ->
-  let to_list_u = to_list u in
-  let to_list_u' = to_list u' in
-  List.mem x (to_list_u a)
-  && List.mem x (to_list_u' a)
-  ==>
-  List.mem x u && List.mem x u'
-) [@@auto] ;;
+(* verify (fun s s' x ->
+ *   let u = [0;1;2;3;4;5;6;7;8;9] in
+ *   Set.mem x s && Set.mem x s' && List.mem x u
+ *   ==> List.mem x (to_list u @@ Set.inter s s')
+ * );;
+ *
+ * verify (fun u s s' x ->
+ *   Set.mem x s && Set.mem x s' && List.mem x u
+ *   ==> List.mem x (to_list u @@ Set.inter s s')
+ * ) [@@auto] ;;
+ *
+ * verify (fun u s s' x ->
+ *   List.mem x (to_list u Set.(inter s s'))
+ *    = (List.mem x (to_list u s) &&
+ *       List.mem x (to_list u s'))
+ * ) [@@auto];;
+ *
+ * verify (fun u a b x ->
+ *   let to_list = to_list u in
+ *   Set.subset a b
+ *   && List.mem x (to_list a)
+ *   ==>
+ *   List.mem x (to_list b)
+ * ) [@@auto] ;;
+ *
+ * verify (fun u a b c d x y ->
+ *   let to_list = to_list u in
+ *   Set.subset a b
+ *   && Set.subset (Set.remove y b) (Set.inter c (Set.diff d a))
+ *   && List.mem x (to_list a)
+ *   ==>
+ *   x = y
+ * ) [@@auto] ;;
+ *
+ * verify (fun u a b c d x y ->
+ *   let to_list = to_list u in
+ *   Set.subset a b && Set.subset b c
+ *   && Set.subset c d
+ *   && List.mem x (to_list a)
+ *   && y >= x && x >= y
+ *   ==>
+ *   List.mem y (to_list d)
+ * ) [@@auto]
+ *
+ * verify (fun u a b c d x y ->
+ *   let to_list = to_list u in
+ *   Set.subset a b && Set.subset b c
+ *   && Set.subset c d
+ *   && List.mem x (to_list a)
+ *   && y < x+1 && y > x-1
+ *   ==>
+ *   List.mem y (to_list d)
+ * ) [@@auto];;
+ *
+ * verify (fun u u' a b c x ->
+ *   let to_list_u = to_list u in
+ *   let to_list_u' = to_list u' in
+ *   List.mem x (to_list_u a)
+ *   && List.mem x (to_list_u' a)
+ *   ==>
+ *   List.mem x u && List.mem x u'
+ * ) [@@auto] ;; *)

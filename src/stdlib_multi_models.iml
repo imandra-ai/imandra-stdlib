@@ -1,0 +1,37 @@
+(* Distinct model sequences in userland in Imandra *)
+(* G.Passmore, Imandra *)
+
+(* Multiple models as an object-level IML query.
+   Note this does not enforce that models are distinct,
+   but they often are in practice and this non-enforcement
+   of distinctness makes it extremely cheap. *)
+
+let rec n_models c ms n =
+  if n < 0 then (
+    false
+  ) else (
+    match ms with
+    | [] -> n=0
+    | m::ms -> c m && n_models c ms (n-1)
+  )
+
+(* Ex. instance (fun ms -> n_models my_condition ms 25);; *)
+
+(* We can use a functional argument and point-wise
+   functional constraints to `force' distinctness.
+   This is exploiting congruence closure and functionality
+   (the axioms of "being a function") in a cool (and cheap!) way.
+*)
+
+let rec n_models_diff c ms n f =
+  if n < 0 then (
+    false
+  ) else (
+    match ms with
+    | [] -> n=0
+    | m::ms ->
+      c m && f m = n
+      && n_models_diff c ms (n-1) f
+  )
+
+(* Ex. instance (fun ms -> n_models_diff my_condition ms 25);; *)
