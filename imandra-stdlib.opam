@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "imandra-stdlib"
-synopsis: "This library contains source files for basic data structures and algorithms for Imandra"
+synopsis: "This library contains source files for basic data structures, algorithms and tools for Imandra"
 version: "1.0.7"
 authors: ["Grant Passmore" "Simon Cruanes"]
 maintainer: "simon@aestheticintegration.com"
