@@ -1,2 +1,3 @@
 _build
 .imandra_init.log
+*.install
