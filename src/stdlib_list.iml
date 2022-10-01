@@ -55,16 +55,21 @@ lemma range_len x y =
 ;;
 
 lemma forall_map f g l =
-  List.for_all f (List.map g l) = List.for_all (fun x -> f (g x)) l
-[@@auto] [@@rw]
+  List.for_all f (List.map g l) [@trigger] = List.for_all (fun x -> f (g x)) l
+[@@auto] [@@rw] [@@fc]
 ;;
 
 lemma forall_filter f g l =
-  List.for_all f (List.filter g l) = List.for_all (fun x -> g x ==> f x) l
-[@@auto] [@@rw]
+  List.for_all f (List.filter g l) [@trigger] = List.for_all (fun x -> g x ==> f x) l
+[@@auto] [@@rw] [@@fc]
 ;;
 
 lemma exist_map f g l =
-  List.exists f (List.map g l) = List.exists (fun x -> f (g x)) l
-[@@auto] [@@rw]
+  List.exists f (List.map g l) [@trigger] = List.exists (fun x -> f (g x)) l
+[@@auto] [@@rw] [@@fc]
+;;
+
+lemma exist_filter f g l =
+  List.exists f (List.filter g l) [@trigger] = List.exists (fun x -> f x && g x) l
+[@@auto] [@@rw] [@@fc]
 ;;
