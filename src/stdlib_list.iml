@@ -73,3 +73,11 @@ lemma exist_filter f g l =
   List.exists f (List.filter g l) [@trigger] = List.exists (fun x -> f x && g x) l
 [@@auto] [@@rw] [@@fc]
 ;;
+
+lemma forall_exists u e xs =
+  List.for_all u xs [@trigger 0i] && List.exists e xs [@trigger 0i] ==>
+  match List.find e xs with
+  | Some el -> u el && e  el
+  | None -> false
+[@@auto] [@@fc]
+;;
