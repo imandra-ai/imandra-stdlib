@@ -9,11 +9,11 @@ module Specd_verify = struct
 
   let rec spec_on_int (ty : Type.t) : Type.t =
     let f = spec_on_int in
-    match ty with
-    | Var _ -> Type.int ()
-    | Arrow (lbl, a, b) -> Arrow (lbl, f a, f b)
-    | Tuple l -> Tuple (List.map f l)
-    | Constr (c, l) -> Constr (c, List.map f l)
+    match Type.view ty with
+    | Var _ -> Type.int
+    | Arrow (lbl, a, b) -> Type.mk_arrow ~lbl (f a) (f b)
+    | Tuple l -> Type.mk_tuple (List.map f l)
+    | Constr (c, l) -> Type.mk_constr c (List.map f l)
 
   (* The trick:
 
