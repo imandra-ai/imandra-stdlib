@@ -3,3 +3,6 @@
 
 [@@@import "stdlib_list.iml"]
 [@@@import "stdlib_set_bridge.iml"]
+[@@@import "stdlib_multi_models.iml"]
+[@@@import "stdlib_real_int_bridge.iml"]
+[@@@import "stdlib_specd_verify.iml"]
