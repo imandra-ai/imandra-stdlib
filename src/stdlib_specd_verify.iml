@@ -6,7 +6,6 @@
 *)
 
 module Specd_verify = struct
-
   let rec spec_on_int (ty : Type.t) : Type.t =
     let f = spec_on_int in
     match Type.view ty with
@@ -28,9 +27,9 @@ module Specd_verify = struct
       `let specd_f : int t = f`.
 
      That's really all there is to it!
-   *)
+  *)
 
-  let mk_specd_call db (f_name:string) =
+  let mk_specd_call db (f_name : string) =
     let d = Event.get_fun_def_by_name db f_name in
     let ty = d.f_ty in
     if Type.is_poly ty then (
@@ -38,21 +37,18 @@ module Specd_verify = struct
       let specd_name = Printf.sprintf "%s_specd" f_name in
       let ty_i_str = Type.to_string_as_ocaml ty_i in
       (* probably want to do `eval_logic` here if you have it... *)
-      let b = Printf.sprintf {| let %s : %s = %s [@@logic] |}
-               specd_name
-               ty_i_str
-               f_name
+      let b =
+        Printf.sprintf {| let %s : %s = %s [@@logic] |} specd_name ty_i_str
+          f_name
       in
       Some (specd_name, b)
-    ) else (
+    ) else
       None
-    )
 
   let top db f_name =
     match mk_specd_call db f_name with
     | None -> Verify.top f_name
-    | Some (nm,b) ->
-      ignore(Imandra.eval_string b);
+    | Some (nm, b) ->
+      ignore (Imandra.eval_string b);
       Verify.top nm
-
 end [@@program]

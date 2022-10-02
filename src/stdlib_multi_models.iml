@@ -7,12 +7,12 @@
    of distinctness makes it extremely cheap. *)
 
 let rec n_models c ms n =
-  if n < 0 then (
+  if n < 0 then
     false
-  ) else (
+  else (
     match ms with
-    | [] -> n=0
-    | m::ms -> c m && n_models c ms (n-1)
+    | [] -> n = 0
+    | m :: ms -> c m && n_models c ms (n - 1)
   )
 
 (* Ex. instance (fun ms -> n_models my_condition ms 25);; *)
@@ -24,14 +24,12 @@ let rec n_models c ms n =
 *)
 
 let rec n_models_diff c ms n f =
-  if n < 0 then (
+  if n < 0 then
     false
-  ) else (
+  else (
     match ms with
-    | [] -> n=0
-    | m::ms ->
-      c m && f m = n
-      && n_models_diff c ms (n-1) f
+    | [] -> n = 0
+    | m :: ms -> c m && f m = n && n_models_diff c ms (n - 1) f
   )
 
 (* Ex. instance (fun ms -> n_models_diff my_condition ms 25);; *)

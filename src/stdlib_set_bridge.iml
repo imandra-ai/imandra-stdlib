@@ -12,11 +12,10 @@ let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
   match u with
   | [] -> []
   | x :: xs ->
-    if Set.mem x s then (
-      x :: (to_list xs s)
-    ) else (
+    if Set.mem x s then
+      x :: to_list xs s
+    else
       to_list xs s
-    )
 ;;
 
 (* Note: It'd also be interesting to develop a version of
