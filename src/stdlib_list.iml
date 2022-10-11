@@ -64,12 +64,12 @@ lemma forall_filter f g l =
 [@@auto] [@@rw]
 ;;
 
-lemma exist_map f g l =
+lemma exists_map f g l =
   List.exists f (List.map g l) [@trigger] = List.exists (fun x -> f (g x)) l
 [@@auto] [@@rw]
 ;;
 
-lemma exist_filter f g l =
+lemma exists_filter f g l =
   List.exists f (List.filter g l) [@trigger] = List.exists (fun x -> f x && g x) l
 [@@auto] [@@rw]
 ;;
