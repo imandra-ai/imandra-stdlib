@@ -9,3 +9,5 @@
 [@@@import "stdlib_real_int_bridge.iml"]
 
 [@@@import "stdlib_specd_verify.iml"]
+
+[@@@import "stdlib_iter_map.iml"]

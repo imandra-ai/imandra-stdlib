@@ -1,0 +1,40 @@
+type ('a, 'b) t = {
+  map: ('a, 'b) Map.t;
+  keys: 'a list;
+}
+
+let rec insert k ks =
+  match ks with
+  | [] -> [ k ]
+  | k' :: ks' ->
+    if k = k' then
+      ks
+    else if k < k' then
+      k :: ks
+    else
+      k' :: insert k ks'
+
+let add k v m = { map = Map.add k v m.map; keys = insert k m.keys }
+
+let get k m = Map.get k m.map
+
+let rec of_list ~default xs =
+  match xs with
+  | [] -> { map = Map.const default; keys = [] }
+  | (k, v) :: xs ->
+    let m = of_list ~default xs in
+    add k v m
+
+let to_list m = List.fold_right (fun l k -> get k m :: l) ~base:[] m.keys
+
+let map_get_add_id m k v = get k (add k v m) = v
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let insert_stable k x ks = List.mem x ks ==> List.mem x (insert k ks)
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let insert_inserts k ks = List.mem k (insert k ks)
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let map_key_mem m k v = List.mem k (add k v m).keys
+  [@@auto] [@@rw] [@@imandra_theorem]
