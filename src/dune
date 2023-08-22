@@ -1,7 +1,11 @@
 (library
  (name imandra_stdlib)
- (public_name imandra-stdlib))
+ (public_name imandra-stdlib)
+ (modules imandra_stdlib_top)
+ (flags
+  (:standard -w -33))
+ (libraries imandra-stdlib.lib imandra-prelude))
 
-(install
- (section lib)
- (files imandra-stdlib.iml stdlib_list.iml stdlib_set_bridge.iml stdlib_real_int_bridge.iml stdlib_multi_models.iml stdlib_specd_verify.iml stdlib_iter_map.iml))
+; (flags
+;  (:standard -open Imandra_stdlib_lib -w -33))
+; (libraries ))

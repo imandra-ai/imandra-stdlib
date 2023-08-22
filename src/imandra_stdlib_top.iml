@@ -1,0 +1,13 @@
+(** {1 Entry point} *)
+
+[@@@import "lib/imandra_stdlib_list.iml"]
+
+[@@@import "lib/imandra_stdlib_set_bridge.iml"]
+
+[@@@import "lib/imandra_stdlib_multi_models.iml"]
+
+[@@@import "lib/imandra_stdlib_real_int_bridge.iml"]
+
+[@@@import "lib/imandra_stdlib_specd_verify.iml"]
+
+[@@@import "lib/imandra_stdlib_iter_map.iml"]
