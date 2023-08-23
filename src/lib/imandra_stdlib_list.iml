@@ -1,0 +1,54 @@
+(** {1 List} *)
+
+type 'a t = 'a List.t
+
+let append_assoc x y z = x @ y @ z = (x @ y) @ z
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let append_id x = x @ [] = x [@@auto] [@@rw] [@@imandra_theorem]
+
+let append_len a b = List.length (a @ b) = List.length a + List.length b
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let append_elim x y a b =
+  List.append x [ a ] = List.append y [ b ] = (x = y && a = b)
+  [@@induct x, y] [@@rw] [@@imandra_theorem]
+
+let rev_elim x y = List.rev x = List.rev y = (x = y)
+  [@@induct x, y] [@@rw] [@@imandra_theorem]
+
+let rev_append x y = List.rev (x @ y) = List.rev y @ List.rev x
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let rev_rev_id x = List.rev (List.rev x) = x [@@auto] [@@rw] [@@imandra_theorem]
+let rev_empty x = List.rev x = [] = (x = []) [@@auto] [@@rw] [@@imandra_theorem]
+
+let rev_len x = List.length (List.rev x) = List.length x
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let range_len x y = x < y ==> List.length List.(x -- y) = y - x
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let forall_map f g l =
+  (List.for_all f (List.map g l) [@trigger]) = List.for_all (fun x -> f (g x)) l
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let forall_filter f g l =
+  (List.for_all f (List.filter g l) [@trigger])
+  = List.for_all (fun x -> g x ==> f x) l
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let exists_map f g l =
+  (List.exists f (List.map g l) [@trigger]) = List.exists (fun x -> f (g x)) l
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let exists_filter f g l =
+  (List.exists f (List.filter g l) [@trigger])
+  = List.exists (fun x -> f x && g x) l
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let forall_exists u e xs =
+  (List.for_all u xs [@trigger 0i])
+  && (List.exists e xs [@trigger 0i])
+     ==> match List.find e xs with Some el -> u el && e el | None -> false
+  [@@auto] [@@fc] [@@imandra_theorem]

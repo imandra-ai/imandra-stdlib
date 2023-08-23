@@ -1,6 +1,0 @@
-(library
- (name imandra_stdlib_lib)
- (public_name imandra-stdlib.lib)
- (flags
-  (:standard -open Imandra_prelude -w -33))
- (libraries imandra-prelude))

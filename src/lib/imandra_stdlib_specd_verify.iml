@@ -1,4 +1,4 @@
-
+[@@@program]
 (* A user-land wrapper around `Verify.top` which uses codegen
    and evaluation to `specialize' a polymorphic goal's type
    parameters to `int`, if there are any.
@@ -32,7 +32,7 @@ let rec spec_on_int (ty : Type.t) : Type.t =
 let mk_specd_call db (f_name : string) =
   let d = Event.get_fun_def_by_name db f_name in
   let ty = d.f_ty in
-  if Type.is_poly ty then (
+  if Type.is_poly ty then
     let ty_i = spec_on_int ty in
     let specd_name = Printf.sprintf "%s_specd" f_name in
     let ty_i_str = Type.to_string_as_ocaml ty_i in
@@ -41,12 +41,11 @@ let mk_specd_call db (f_name : string) =
       Printf.sprintf {| let %s : %s = %s [@@logic] |} specd_name ty_i_str f_name
     in
     Some (specd_name, b)
-  ) else
-    None
+  else None
 
 let top db f_name =
   match mk_specd_call db f_name with
   | None -> Verify.top f_name
   | Some (nm, b) ->
-    ignore (Imandra.eval_string b);
-    Verify.top nm
+      ignore (Imandra.eval_string b);
+      Verify.top nm
