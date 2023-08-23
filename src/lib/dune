@@ -2,5 +2,13 @@
  (name imandra_stdlib_lib)
  (public_name imandra-stdlib.lib)
  (flags
-  (:standard -open Imandra_prelude -open Imandra_surface -open Imandra_interactive -w -33))
+  (:standard
+   -open
+   Imandra_prelude
+   -open
+   Imandra_surface
+   -open
+   Imandra_interactive
+   -w
+   -33))
  (libraries imandra-prelude imandra-surface imandra-base.interactive))

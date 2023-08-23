@@ -21,6 +21,7 @@ let rev_append x y = List.rev (x @ y) = List.rev y @ List.rev x
   [@@auto] [@@rw] [@@imandra_theorem]
 
 let rev_rev_id x = List.rev (List.rev x) = x [@@auto] [@@rw] [@@imandra_theorem]
+
 let rev_empty x = List.rev x = [] = (x = []) [@@auto] [@@rw] [@@imandra_theorem]
 
 let rev_len x = List.length (List.rev x) = List.length x
@@ -50,5 +51,8 @@ let exists_filter f g l =
 let forall_exists u e xs =
   (List.for_all u xs [@trigger 0i])
   && (List.exists e xs [@trigger 0i])
-     ==> match List.find e xs with Some el -> u el && e el | None -> false
+     ==>
+     match List.find e xs with
+     | Some el -> u el && e el
+     | None -> false
   [@@auto] [@@fc] [@@imandra_theorem]

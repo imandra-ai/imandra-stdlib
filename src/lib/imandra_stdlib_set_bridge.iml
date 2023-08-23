@@ -11,7 +11,11 @@ type 'a universe = 'a list
 let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
   match u with
   | [] -> []
-  | x :: xs -> if Set.mem x s then x :: to_list xs s else to_list xs s
+  | x :: xs ->
+    if Set.mem x s then
+      x :: to_list xs s
+    else
+      to_list xs s
 
 (* Note: It'd also be interesting to develop a version of
    `to_list` which enforces non-duplication through a
@@ -27,10 +31,14 @@ let mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
 (* A choice function *)
 
 let choose (u : 'a universe) (s : 'a Set.t) : 'a option =
-  match to_list u s with [] -> None | x :: _ -> Some x
+  match to_list u s with
+  | [] -> None
+  | x :: _ -> Some x
 
 let choose_mem (u : 'a universe) (s : 'a Set.t) =
-  match choose u s with None -> true | Some x -> Set.mem x s
+  match choose u s with
+  | None -> true
+  | Some x -> Set.mem x s
   [@@auto] [@@rw] [@@imandra_theorem]
 
 let choose_empty (u : 'a universe) (s : 'a Set.t) (x : 'a) =

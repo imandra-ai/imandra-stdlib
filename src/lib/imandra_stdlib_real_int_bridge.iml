@@ -15,16 +15,28 @@
 *)
 
 let rec floor (x : real) (base : int) : int =
-  if Real.(x <= 0.0) then 0
-  else
+  if Real.(x <= 0.0) then
+    0
+  else (
     let r = Real.of_int base in
-    if r = x then base else if Real.(r > x) then base - 1 else floor x (base + 1)
+    if r = x then
+      base
+    else if Real.(r > x) then
+      base - 1
+    else
+      floor x (base + 1)
+  )
   [@@measure Ordinal.of_int (floor x base - base)] [@@auto]
 
 (* Real->Int conversion for `psd' (i.e., >=0) reals *)
 
 let int_of_real_psd (x : real) : int = floor x 0
-let rec int_induct n = if n <= 0 then 0 else int_induct (n - 1)
+
+let rec int_induct n =
+  if n <= 0 then
+    0
+  else
+    int_induct (n - 1)
 
 let floor_psd x y = floor x y >= 0
   [@@induct_term int_induct y] [@@rw] [@@imandra_theorem] [@@fc]
