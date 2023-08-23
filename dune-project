@@ -27,4 +27,5 @@
 
 (package
  (name imandra-stdlib)
+ (depends imandra-prelude imandra-base imandra-surface)
  (synopsis "Imandra standard library"))
