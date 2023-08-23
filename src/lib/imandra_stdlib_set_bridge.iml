@@ -16,7 +16,6 @@ let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
       x :: to_list xs s
     else
       to_list xs s
-;;
 
 (* Note: It'd also be interesting to develop a version of
    `to_list` which enforces non-duplication through a
@@ -25,9 +24,9 @@ let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
 
 (* The fundamental lemma for projection into a universe *)
 
-lemma mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+let mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   List.mem x (to_list u s) = (Set.mem x s && List.mem x u)
-[@@auto] [@@rw] ;;
+  [@@auto] [@@rw] [@@imandra_theorem]
 
 (* A choice function *)
 
@@ -35,97 +34,87 @@ let choose (u : 'a universe) (s : 'a Set.t) : 'a option =
   match to_list u s with
   | [] -> None
   | x :: _ -> Some x
-;;
 
-lemma choose_mem (u : 'a universe) (s : 'a Set.t) =
+let choose_mem (u : 'a universe) (s : 'a Set.t) =
   match choose u s with
   | None -> true
   | Some x -> Set.mem x s
-[@@auto] [@@rw] ;;
+  [@@auto] [@@rw] [@@imandra_theorem]
 
-lemma choose_empty (u : 'a universe) (s : 'a Set.t) (x : 'a) =
-  choose u s = None
-  && List.mem x u
-  ==>
-  not (Set.mem x s)
-[@@auto] ;;
+let choose_empty (u : 'a universe) (s : 'a Set.t) (x : 'a) =
+  choose u s = None && List.mem x u ==> not (Set.mem x s)
+  [@@auto]
 
 (* Algebraic laws of membership - all automatic via
    our u-projective workhorse, `mem_to_list`! *)
 
-lemma mem_union u x a b =
+let mem_union u x a b =
   List.mem x (to_list u @@ Set.union a b)
-  = (List.mem x u
-     && (Set.mem x a || Set.mem x b))
-[@@auto] ;;
+  = (List.mem x u && (Set.mem x a || Set.mem x b))
+  [@@auto] [@@imandra_theorem]
 
-lemma mem_inter u x a b =
+let mem_inter u x a b =
   List.mem x (to_list u @@ Set.inter a b)
-  = (List.mem x u
-     && (Set.mem x a && Set.mem x b))
-[@@auto] ;;
+  = (List.mem x u && Set.mem x a && Set.mem x b)
+  [@@auto] [@@imandra_theorem]
 
-lemma mem_diff u x a b =
+let mem_diff u x a b =
   List.mem x (to_list u @@ Set.diff a b)
-  = (List.mem x u
-     && (Set.mem x a && not (Set.mem x b)))
-[@@auto] ;;
+  = (List.mem x u && Set.mem x a && not (Set.mem x b))
+  [@@auto] [@@imandra_theorem]
 
 (* Bridged size / cardinality *)
 
-let size (u : 'a universe) (s : 'a Set.t) = List.length (to_list u s) ;;
+let size (u : 'a universe) (s : 'a Set.t) = List.length (to_list u s)
 
-lemma size_psd (u : 'a universe) (a : 'a Set.t) =
-  size u a >= 0
-[@@auto] [@@fc] ;;
+let size_psd (u : 'a universe) (a : 'a Set.t) = size u a >= 0
+  [@@auto] [@@fc] [@@imandra_theorem]
 
-lemma size_union (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+let size_union (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) = size u a + size u b - size u (Set.inter a b)
-[@@auto] [@@rw] ;;
+  [@@auto] [@@rw] [@@imandra_theorem]
 
-lemma size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
-  (size u (Set.inter a b)) [@trigger] = size u a + size u b - size u (Set.union a b)
-[@@auto] ;;
+let size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+  (size u (Set.inter a b) [@trigger])
+  = size u a + size u b - size u (Set.union a b)
+  [@@auto] [@@imandra_theorem]
 
-lemma size_union_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+let size_union_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) <= size u a + size u b
-[@@auto] [@@fc] ;;
+  [@@auto] [@@fc] [@@imandra_theorem]
 
-lemma size_inter_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+let size_inter_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.inter a b) <= size u a + size u b
-[@@auto] [@@apply size_inter u a b] [@@fc] ;;
+  [@@auto] [@@apply size_inter u a b] [@@fc] [@@imandra_theorem]
 
-lemma size_inter_lt_union u a b =
-  size u (Set.inter a b) <= size u (Set.union a b)
-[@@auto] [@@apply size_inter u a b] [@@rw] ;;
+let size_inter_lt_union u a b = size u (Set.inter a b) <= size u (Set.union a b)
+  [@@auto] [@@apply size_inter u a b] [@@rw] [@@imandra_theorem]
 
-lemma size_empty (u : 'a universe) (s : 'a Set.t) =
+let size_empty (u : 'a universe) (s : 'a Set.t) =
   Set.is_empty s ==> size u s = 0
-[@@auto] [@@rw] ;;
+  [@@auto] [@@rw] [@@imandra_theorem]
 
 (* FIXME: re-prove that
-(* Note: we don't have `_ = size u s + 1` as universes may have duplicates! *)
-lemma size_add_fresh (u : 'a universe) (x : 'a) (s : 'a Set.t) =
-  not (Set.mem x s) && List.mem x u ==> size u (Set.add x s) > size u s
-[@@auto] [@@rw] ;;
+   (* Note: we don't have `_ = size u s + 1` as universes may have duplicates! *)
+   let size_add_fresh (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+     not (Set.mem x s) && List.mem x u ==> size u (Set.add x s) > size u s
+   [@@auto] [@@rw] [@@imandra_theorem] ;;
 *)
 
-lemma size_add_eq (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+let size_add_eq (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   Set.mem x s && List.mem x u ==> size u (Set.add x s) = size u s
-[@@auto] [@@rw] ;;
+  [@@auto] [@@rw] [@@imandra_theorem]
 
-lemma size_diff u a b =
-  size u (Set.diff a b) = size u a - size u (Set.inter a b)
-[@@auto] [@@rw] ;;
+let size_diff u a b = size u (Set.diff a b) = size u a - size u (Set.inter a b)
+  [@@auto] [@@rw] [@@imandra_theorem]
 
 (* The size of a 'projected' set is always bounded by the
    size of its universe. *)
 
-lemma size_bounded u a =
-  size u a <= List.length u
-[@@auto] [@@rw] ;;
+let size_bounded u a = size u a <= List.length u
+  [@@auto] [@@rw] [@@imandra_theorem]
 
-[@@@disable size] ;;
+[@@@disable size]
 
 (* Some nice concrete examples showing automatic use of the
    bridge *)

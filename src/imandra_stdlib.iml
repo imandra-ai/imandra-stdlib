@@ -1,0 +1,20 @@
+(** {1 Entry point} *)
+
+[@@@import "lib/imandra_stdlib_list.iml"]
+
+[@@@import "lib/imandra_stdlib_set_bridge.iml"]
+
+[@@@import "lib/imandra_stdlib_multi_models.iml"]
+
+[@@@import "lib/imandra_stdlib_real_int_bridge.iml"]
+
+[@@@import "lib/imandra_stdlib_specd_verify.iml"]
+
+[@@@import "lib/imandra_stdlib_iter_map.iml"]
+
+module List = Imandra_stdlib_list
+module Set_bridge = Imandra_stdlib_set_bridge
+module Multi_models = Imandra_stdlib_multi_models
+module Real_int_bridge = Imandra_stdlib_real_int_bridge
+module Specd_verify = Imandra_stdlib_specd_verify
+module Iter_map = Imandra_stdlib_iter_map
