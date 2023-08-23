@@ -25,6 +25,8 @@
 
 (homepage "https://imandra.ai")
 
+(version 1.0.8)
+
 (package
  (name imandra-stdlib)
  (depends imandra-prelude imandra-base imandra-surface)
