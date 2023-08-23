@@ -1,11 +1,7 @@
 (library
  (name imandra_stdlib)
  (public_name imandra-stdlib)
- (modules imandra_stdlib_top)
+ (modules imandra_stdlib)
  (flags
-  (:standard -w -33))
+  (:standard -w -33 -open Imandra_stdlib_lib))
  (libraries imandra-stdlib.lib imandra-prelude))
-
-; (flags
-;  (:standard -open Imandra_stdlib_lib -w -33))
-; (libraries ))
