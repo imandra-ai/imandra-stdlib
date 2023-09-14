@@ -114,10 +114,10 @@ let rec partition_rev_map_aux l_rev r_rev f xs =
     partition_rev_map_aux l_rev r_rev f xs
   | [] -> l_rev, r_rev
 
-let len_rev xs = List.length (List.rev xs) = List.length xs
+let thm_len_rev xs = List.length (List.rev xs) = List.length xs
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let len_partition_rev_map_aux l_rev r_rev f xs =
+let thm_len_partition_rev_map_aux l_rev r_rev f xs =
   let ys, zs = (partition_rev_map_aux l_rev r_rev f xs [@trigger]) in
   List.length ys + List.length zs
   = List.length l_rev + List.length r_rev + List.length xs
@@ -125,24 +125,24 @@ let len_partition_rev_map_aux l_rev r_rev f xs =
 
 let partition_rev_map f xs = partition_rev_map_aux [] [] f xs
 
-let len_partition_rev_map f xs =
+let thm_len_partition_rev_map f xs =
   let ys, zs = partition_rev_map f xs in
   List.length ys + List.length zs = List.length xs
   [@@imandra_theorem]
   [@@auto]
-  [@@apply len_partition_rev_map_aux [] [] f xs]
+  [@@apply thm_len_partition_rev_map_aux [] [] f xs]
   [@@fc]
 
 let partition_map f xs =
   let a, b = partition_rev_map_aux [] [] f xs in
   List.rev a, List.rev b
 
-let len_partition_map f xs =
+let thm_len_partition_map f xs =
   let ys, zs = partition_map f xs in
   List.length ys + List.length zs = List.length xs
   [@@imandra_theorem]
   [@@auto]
-  [@@apply len_partition_rev_map_aux [] [] f xs]
+  [@@apply thm_len_partition_rev_map_aux [] [] f xs]
   [@@fc]
 
 let partition f xs =
@@ -154,16 +154,16 @@ let partition f xs =
         Right x)
     xs
 
-let len_partition f xs =
+let thm_len_partition f xs =
   let ys, zs = partition f xs in
   List.length ys + List.length zs = List.length xs
   [@@imandra_theorem] [@@auto] [@@disable partition_map] [@@fc]
 
-let len_insert_sorted ~leq x l =
+let thm_len_insert_sorted ~leq x l =
   List.length (List.insert_sorted ~leq x l) = List.length l + 1
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let len_sort ~leq l = List.length (sort ~leq l) = List.length l
+let thm_len_sort ~leq l = List.length (sort ~leq l) = List.length l
   [@@auto] [@@rw] [@@imandra_theorem]
 
 let rec group_by_aux ~key_fn ~merge_vals_fn al l =
