@@ -15,4 +15,7 @@ _opam:
 opam-install-editor-deps: _opam
 	opam install -y ocamlformat.0.22.4
 
-.PHONY: all install uninstall
+format:
+	@dune build @fmt --display=quiet --auto-promote
+
+.PHONY: all install uninstall format
