@@ -1,0 +1,10 @@
+let compose cmp1 cmp2 x y =
+  let i = cmp1 x y in
+  if i = 0 then
+    cmp2 x y
+  else
+    i
+
+module Infix = struct
+  let ( %> ) cmp1 cmp2 = compose cmp1 cmp2
+end

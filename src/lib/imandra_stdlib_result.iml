@@ -1,0 +1,3 @@
+let to_opt = function
+  | Ok s -> Some s
+  | Error _ -> None

@@ -2,53 +2,55 @@
 
 type 'a t = 'a List.t
 
-let append_assoc x y z = x @ y @ z = (x @ y) @ z
+let thm_append_assoc x y z = x @ y @ z = (x @ y) @ z
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let append_id x = x @ [] = x [@@auto] [@@rw] [@@imandra_theorem]
+let thm_append_id x = x @ [] = x [@@auto] [@@rw] [@@imandra_theorem]
 
-let append_len a b = List.length (a @ b) = List.length a + List.length b
+let thm_append_len a b = List.length (a @ b) = List.length a + List.length b
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let append_elim x y a b =
+let thm_append_elim x y a b =
   List.append x [ a ] = List.append y [ b ] = (x = y && a = b)
   [@@induct x, y] [@@rw] [@@imandra_theorem]
 
-let rev_elim x y = List.rev x = List.rev y = (x = y)
+let thm_rev_elim x y = List.rev x = List.rev y = (x = y)
   [@@induct x, y] [@@rw] [@@imandra_theorem]
 
-let rev_append x y = List.rev (x @ y) = List.rev y @ List.rev x
+let thm_rev_append x y = List.rev (x @ y) = List.rev y @ List.rev x
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let rev_rev_id x = List.rev (List.rev x) = x [@@auto] [@@rw] [@@imandra_theorem]
-
-let rev_empty x = List.rev x = [] = (x = []) [@@auto] [@@rw] [@@imandra_theorem]
-
-let rev_len x = List.length (List.rev x) = List.length x
+let thm_rev_rev_id x = List.rev (List.rev x) = x
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let range_len x y = x < y ==> List.length List.(x -- y) = y - x
+let thm_rev_empty x = List.rev x = [] = (x = [])
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let forall_map f g l =
+let thm_rev_len x = List.length (List.rev x) = List.length x
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let thm_range_len x y = x < y ==> List.length List.(x -- y) = y - x
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let thm_forall_map f g l =
   (List.for_all f (List.map g l) [@trigger]) = List.for_all (fun x -> f (g x)) l
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let forall_filter f g l =
+let thm_forall_filter f g l =
   (List.for_all f (List.filter g l) [@trigger])
   = List.for_all (fun x -> g x ==> f x) l
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let exists_map f g l =
+let thm_exists_map f g l =
   (List.exists f (List.map g l) [@trigger]) = List.exists (fun x -> f (g x)) l
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let exists_filter f g l =
+let thm_exists_filter f g l =
   (List.exists f (List.filter g l) [@trigger])
   = List.exists (fun x -> f x && g x) l
   [@@auto] [@@rw] [@@imandra_theorem]
 
-let forall_exists u e xs =
+let thm_forall_exists u e xs =
   (List.for_all u xs [@trigger 0i])
   && (List.exists e xs [@trigger 0i])
      ==>
@@ -56,3 +58,134 @@ let forall_exists u e xs =
      | Some el -> u el && e el
      | None -> false
   [@@auto] [@@fc] [@@imandra_theorem]
+
+let sort ~leq =
+  List.fold_right (fun x acc -> List.insert_sorted ~leq x acc) ~base:[]
+
+let thm_len_append x y =
+  List.length (List.append x y) = List.length x + List.length y
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let rec remove_opt_aux f acc (xs : 'order list) =
+  match xs with
+  | [] -> None
+  | o :: xs when f o -> Some (o, List.rev acc @ xs)
+  | o :: xs -> remove_opt_aux f (o :: acc) xs
+
+let thm_list_remove_opt_aux_len f acc xs =
+  match remove_opt_aux f acc xs with
+  | None -> true
+  | Some (_, ys) -> List.length ys < List.length acc + List.length xs
+  [@@imandra_theorem] [@@auto] [@@fc]
+
+let remove_opt f xs = remove_opt_aux f [] xs
+
+let thm_list_remove_opt_len f xs =
+  match remove_opt f xs with
+  | None -> true
+  | Some (_, ys) -> List.length ys < List.length xs
+  [@@imandra_theorem]
+  [@@auto]
+  [@@apply thm_list_remove_opt_aux_len f [] xs]
+  [@@fc]
+
+let remove_all p l = List.filter (fun x -> not (p x)) l
+
+let thm_list_remove_not_exists_bridge p l l' =
+  l = remove_all p l' ==> not (List.exists p l)
+  [@@fc] [@@auto] [@@imandra_theorem]
+
+let rec update_first_aux pred upd acc (xs : 'order list) =
+  match xs with
+  | [] -> []
+  | o :: xs when pred o -> List.rev acc @ (upd o :: xs)
+  | o :: xs -> update_first_aux pred upd (o :: acc) xs
+
+let update_first pred upd xs = update_first_aux pred upd [] xs
+
+let rec partition_rev_map_aux l_rev r_rev f xs =
+  match xs with
+  | x :: xs ->
+    let l_rev, r_rev =
+      match f x with
+      | Left l -> l :: l_rev, r_rev
+      | Right r -> l_rev, r :: r_rev
+    in
+    partition_rev_map_aux l_rev r_rev f xs
+  | [] -> l_rev, r_rev
+
+let len_rev xs = List.length (List.rev xs) = List.length xs
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let len_partition_rev_map_aux l_rev r_rev f xs =
+  let ys, zs = (partition_rev_map_aux l_rev r_rev f xs [@trigger]) in
+  List.length ys + List.length zs
+  = List.length l_rev + List.length r_rev + List.length xs
+  [@@imandra_theorem] [@@auto] [@@fc]
+
+let partition_rev_map f xs = partition_rev_map_aux [] [] f xs
+
+let len_partition_rev_map f xs =
+  let ys, zs = partition_rev_map f xs in
+  List.length ys + List.length zs = List.length xs
+  [@@imandra_theorem]
+  [@@auto]
+  [@@apply len_partition_rev_map_aux [] [] f xs]
+  [@@fc]
+
+let partition_map f xs =
+  let a, b = partition_rev_map_aux [] [] f xs in
+  List.rev a, List.rev b
+
+let len_partition_map f xs =
+  let ys, zs = partition_map f xs in
+  List.length ys + List.length zs = List.length xs
+  [@@imandra_theorem]
+  [@@auto]
+  [@@apply len_partition_rev_map_aux [] [] f xs]
+  [@@fc]
+
+let partition f xs =
+  partition_map
+    (fun x ->
+      if f x then
+        Left x
+      else
+        Right x)
+    xs
+
+let len_partition f xs =
+  let ys, zs = partition f xs in
+  List.length ys + List.length zs = List.length xs
+  [@@imandra_theorem] [@@auto] [@@disable partition_map] [@@fc]
+
+let len_insert_sorted ~leq x l =
+  List.length (List.insert_sorted ~leq x l) = List.length l + 1
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let len_sort ~leq l = List.length (sort ~leq l) = List.length l
+  [@@auto] [@@rw] [@@imandra_theorem]
+
+let rec group_by_aux ~key_fn ~merge_vals_fn al l =
+  match l with
+  | [] -> al
+  | (k, v) :: l ->
+    let k = key_fn k in
+    let al =
+      match remove_opt (fun (k', _) -> k = k') al with
+      | Some ((_, v'), al) -> (k, merge_vals_fn v' v) :: al
+      | None -> (k, v) :: al
+    in
+    group_by_aux ~key_fn ~merge_vals_fn al l
+  [@@adm l]
+
+let group_by ~key_fn ~merge_vals_fn l = group_by_aux ~key_fn ~merge_vals_fn [] l
+
+let uniq ~eq l =
+  let rec uniq eq acc l =
+    match l with
+    | [] -> List.rev acc
+    | x :: xs when List.exists (eq x) xs -> uniq eq acc xs
+    | x :: xs -> uniq eq (x :: acc) xs
+  in
+  uniq eq [] l

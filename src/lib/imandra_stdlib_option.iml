@@ -1,0 +1,17 @@
+let to_result e = function
+  | Some x -> Ok x
+  | None -> Error e
+
+let map_to_result (f : 'a -> 'b option) e (x : 'a option) :
+    ('b option, 'e) result =
+  match x with
+  | None -> Ok None
+  | Some x ->
+    (match f x with
+    | None -> Error e
+    | Some x -> Ok (Some x))
+
+let rec choice = function
+  | [] -> None
+  | None :: xs -> choice xs
+  | Some x :: _ -> Some x
