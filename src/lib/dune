@@ -5,10 +5,6 @@
   (:standard
    -open
    Imandra_prelude
-   -open
-   Imandra_surface
-   -open
-   Imandra_interactive
    -w
    -33))
- (libraries imandra-prelude imandra-surface imandra-base.interactive))
+ (libraries imandra-prelude))

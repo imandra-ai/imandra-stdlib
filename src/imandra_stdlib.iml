@@ -26,4 +26,3 @@ module Iter_map = Imandra_stdlib_iter_map
 module Set_bridge = Imandra_stdlib_set_bridge
 module Multi_models = Imandra_stdlib_multi_models
 module Real_int_bridge = Imandra_stdlib_real_int_bridge
-module Specd_verify = Imandra_stdlib_specd_verify

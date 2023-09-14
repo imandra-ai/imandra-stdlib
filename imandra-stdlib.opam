@@ -10,8 +10,6 @@ bug-reports: "The Imandra team <tech@imandra.ai>"
 depends: [
   "dune" {>= "2.9"}
   "imandra-prelude"
-  "imandra-base"
-  "imandra-surface"
   "odoc" {with-doc}
 ]
 build: [
