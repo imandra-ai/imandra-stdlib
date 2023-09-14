@@ -29,5 +29,5 @@
 
 (package
  (name imandra-stdlib)
- (depends imandra-prelude)
+ (depends imandra-prelude (imandra-base :build))
  (synopsis "Imandra standard library"))
