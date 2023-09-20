@@ -189,3 +189,10 @@ let uniq ~eq l =
     | x :: xs -> uniq eq (x :: acc) xs
   in
   uniq eq [] l
+
+let rec find_map f = function
+  | [] -> None
+  | x :: xs ->
+    (match f x with
+    | Some v -> Some v
+    | None -> find_map f xs)
