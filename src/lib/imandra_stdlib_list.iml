@@ -196,3 +196,9 @@ let rec find_map f = function
     (match f x with
     | Some v -> Some v
     | None -> find_map f xs)
+
+let cons_when b x l =
+  if b then
+    x :: l
+  else
+    l
