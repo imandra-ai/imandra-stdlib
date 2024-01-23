@@ -202,3 +202,8 @@ let cons_when b x l =
     x :: l
   else
     l
+
+let cons_maybe x l =
+  match x with
+  | None -> l
+  | Some x -> x :: l
