@@ -207,3 +207,10 @@ let cons_maybe x l =
   match x with
   | None -> l
   | Some x -> x :: l
+
+let rec for_all2 f l1 l2 =
+  let open Result in
+  match l1, l2 with
+  | [], [] -> Ok true
+  | x :: l1, y :: l2 -> for_all2 f l1 l2 >|= ( && ) (f x y)
+  | _, _ -> Error "for_all2: Lengths of l1 and l2 don't match"
