@@ -214,3 +214,18 @@ let rec for_all2 f l1 l2 =
   | [], [] -> Ok true
   | x :: l1, y :: l2 -> for_all2 f l1 l2 >|= ( && ) (f x y)
   | _, _ -> Error "for_all2: Lengths of l1 and l2 don't match"
+
+let rec for_all2_t f l1 l2 =
+  match l1, l2 with
+  | [], [] -> true
+  | x :: l1, y :: l2 -> f x y && for_all2_t f l1 l2
+  | _, _ -> false
+
+let rec map2_t f l1 l2 =
+  if List.length l1 = List.length l2 then (
+    match l1, l2 with
+    | [], [] -> []
+    | x :: l1, y :: l2 -> f x y :: map2_t f l1 l2
+    | _, _ -> []
+  ) else
+    []
