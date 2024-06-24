@@ -222,10 +222,7 @@ let rec for_all2_t f l1 l2 =
   | _, _ -> false
 
 let rec map2_t f l1 l2 =
-  if List.length l1 = List.length l2 then (
-    match l1, l2 with
-    | [], [] -> []
-    | x :: l1, y :: l2 -> f x y :: map2_t f l1 l2
-    | _, _ -> []
-  ) else
-    []
+  match l1, l2 with
+  | [], _ -> []
+  | _, [] -> []
+  | x :: l1, y :: l2 -> f x y :: map2_t f l1 l2
