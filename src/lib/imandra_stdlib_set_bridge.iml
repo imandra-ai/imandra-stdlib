@@ -26,7 +26,7 @@ let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
 
 theorem thm_mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   List.mem x (to_list u s) = (Set.mem x s && List.mem x u)
-  [@@by induct ~on_fun:"to_list" ()] [@@rw];;
+  [@@by induct ~on_fun:[%id to_list] ()] [@@rw];;
 
 (* A choice function *)
 

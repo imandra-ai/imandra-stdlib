@@ -31,7 +31,7 @@ theorem thm_map_get_add_id m k v = get k (add k v m) = v
   [@@by auto] [@@rw]
 
 theorem thm_insert_stable k x ks = List.mem x ks ==> List.mem x (insert k ks)
-  [@@by induct ~on_fun:"insert" ()] [@@rw]
+  [@@by induct ~on_fun:[%id insert] ()] [@@rw]
 
 theorem thm_insert_inserts k ks = List.mem k (insert k ks)
   [@@by auto] [@@rw]
