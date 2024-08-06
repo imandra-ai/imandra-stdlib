@@ -2,69 +2,70 @@
 
 type 'a t = 'a List.t
 
-let thm_append_assoc x y z = x @ y @ z = (x @ y) @ z
-  [@@auto] [@@rw] [@@imandra_theorem]
 
-let thm_append_id x = x @ [] = x [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_append_assoc x y z = x @ y @ z = (x @ y) @ z
+  [@@by auto] [@@rw]
 
-let thm_append_len a b = List.length (a @ b) = List.length a + List.length b
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_append_id x = x @ [] = x [@@by auto] [@@rw]
 
-let thm_append_elim x y a b =
+theorem thm_append_len a b = List.length (a @ b) = List.length a + List.length b
+  [@@by auto] [@@rw]
+
+theorem thm_append_elim x y a b =
   List.append x [ a ] = List.append y [ b ] = (x = y && a = b)
-  [@@induct x, y] [@@rw] [@@imandra_theorem]
+  [@@by induct ~on_vars:["x"; "y"] ()] [@@rw]
 
-let thm_rev_elim x y = List.rev x = List.rev y = (x = y)
-  [@@induct x, y] [@@rw] [@@imandra_theorem]
+theorem thm_rev_elim x y = List.rev x = List.rev y = (x = y)
+  [@@by induct ~on_vars:["x"; "y"] ()] [@@rw]
 
-let thm_rev_append x y = List.rev (x @ y) = List.rev y @ List.rev x
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_rev_append x y = List.rev (x @ y) = List.rev y @ List.rev x
+  [@@by auto] [@@rw]
 
-let thm_rev_rev_id x = List.rev (List.rev x) = x
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_rev_rev_id x = List.rev (List.rev x) = x
+  [@@by auto] [@@rw]
 
-let thm_rev_empty x = List.rev x = [] = (x = [])
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_rev_empty x = List.rev x = [] = (x = [])
+  [@@by auto] [@@rw]
 
-let thm_rev_len x = List.length (List.rev x) = List.length x
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_rev_len x = List.length (List.rev x) = List.length x
+  [@@by auto] [@@rw]
 
-let thm_range_len x y = x < y ==> List.length List.(x -- y) = y - x
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_range_len x y = x < y ==> List.length List.(x -- y) = y - x
+  [@@by auto] [@@rw]
 
-let thm_forall_map f g l =
+theorem thm_forall_map f g l =
   (List.for_all f (List.map g l) [@trigger]) = List.for_all (fun x -> f (g x)) l
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_forall_filter f g l =
+theorem thm_forall_filter f g l =
   (List.for_all f (List.filter g l) [@trigger])
   = List.for_all (fun x -> g x ==> f x) l
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_exists_map f g l =
+theorem thm_exists_map f g l =
   (List.exists f (List.map g l) [@trigger]) = List.exists (fun x -> f (g x)) l
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_exists_filter f g l =
+theorem thm_exists_filter f g l =
   (List.exists f (List.filter g l) [@trigger])
   = List.exists (fun x -> f x && g x) l
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_forall_exists u e xs =
+theorem thm_forall_exists u e xs =
   (List.for_all u xs [@trigger 0i])
   && (List.exists e xs [@trigger 0i])
      ==>
      match List.find e xs with
      | Some el -> u el && e el
      | None -> false
-  [@@auto] [@@fc] [@@imandra_theorem]
+  [@@by auto] [@@fc]
 
-let sort ~leq =
-  List.fold_right (fun x acc -> List.insert_sorted ~leq x acc) ~base:[]
+let sort ~leq l =
+  List.fold_left (fun acc x -> List.insert_sorted ~leq x acc) [] l
 
-let thm_len_append x y =
+theorem thm_len_append x y =
   List.length (List.append x y) = List.length x + List.length y
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
 let rec remove_opt_aux f acc (xs : 'order list) =
   match xs with
@@ -72,28 +73,26 @@ let rec remove_opt_aux f acc (xs : 'order list) =
   | o :: xs when f o -> Some (o, List.rev acc @ xs)
   | o :: xs -> remove_opt_aux f (o :: acc) xs
 
-let thm_list_remove_opt_aux_len f acc xs =
+theorem thm_list_remove_opt_aux_len f acc xs =
   match remove_opt_aux f acc xs with
   | None -> true
   | Some (_, ys) -> List.length ys < List.length acc + List.length xs
-  [@@imandra_theorem] [@@auto] [@@fc]
+  [@@by auto] [@@fc]
 
 let remove_opt f xs = remove_opt_aux f [] xs
 
-let thm_list_remove_opt_len f xs =
+theorem thm_list_remove_opt_len f xs =
   match remove_opt f xs with
   | None -> true
   | Some (_, ys) -> List.length ys < List.length xs
-  [@@imandra_theorem]
-  [@@auto]
-  [@@apply thm_list_remove_opt_aux_len f [] xs]
+  [@@by using (quote_term (thm_list_remove_opt_aux_len f [] xs)) @> auto]
   [@@fc]
 
 let remove_all p l = List.filter (fun x -> not (p x)) l
 
-let thm_list_remove_not_exists_bridge p l l' =
+theorem thm_list_remove_not_exists_bridge p l l' =
   l = remove_all p l' ==> not (List.exists p l)
-  [@@fc] [@@auto] [@@imandra_theorem]
+  [@@fc] [@@by auto]
 
 let rec update_first_aux pred upd acc (xs : 'order list) =
   match xs with
@@ -114,35 +113,31 @@ let rec partition_rev_map_aux l_rev r_rev f xs =
     partition_rev_map_aux l_rev r_rev f xs
   | [] -> l_rev, r_rev
 
-let thm_len_rev xs = List.length (List.rev xs) = List.length xs
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_len_rev xs = List.length (List.rev xs) = List.length xs
+  [@@by auto] [@@rw]
 
-let thm_len_partition_rev_map_aux l_rev r_rev f xs =
+theorem thm_len_partition_rev_map_aux l_rev r_rev f xs =
   let ys, zs = (partition_rev_map_aux l_rev r_rev f xs [@trigger]) in
   List.length ys + List.length zs
   = List.length l_rev + List.length r_rev + List.length xs
-  [@@imandra_theorem] [@@auto] [@@fc]
+  [@@by auto] [@@fc]
 
 let partition_rev_map f xs = partition_rev_map_aux [] [] f xs
 
-let thm_len_partition_rev_map f xs =
+theorem thm_len_partition_rev_map f xs =
   let ys, zs = partition_rev_map f xs in
   List.length ys + List.length zs = List.length xs
-  [@@imandra_theorem]
-  [@@auto]
-  [@@apply thm_len_partition_rev_map_aux [] [] f xs]
+  [@@by using (quote_term (thm_len_partition_rev_map_aux [] [] f xs)) @> auto]
   [@@fc]
 
 let partition_map f xs =
   let a, b = partition_rev_map_aux [] [] f xs in
   List.rev a, List.rev b
 
-let thm_len_partition_map f xs =
+theorem thm_len_partition_map f xs =
   let ys, zs = partition_map f xs in
   List.length ys + List.length zs = List.length xs
-  [@@imandra_theorem]
-  [@@auto]
-  [@@apply thm_len_partition_rev_map_aux [] [] f xs]
+  [@@by using (quote_term (thm_len_partition_rev_map_aux [] [] f xs)) @> auto]
   [@@fc]
 
 let partition f xs =
@@ -154,17 +149,17 @@ let partition f xs =
         Right x)
     xs
 
-let thm_len_partition f xs =
+theorem thm_len_partition f xs =
   let ys, zs = partition f xs in
   List.length ys + List.length zs = List.length xs
-  [@@imandra_theorem] [@@auto] [@@disable partition_map] [@@fc]
+  [@@by auto] [@@disable partition_map] [@@fc]
 
-let thm_len_insert_sorted ~leq x l =
+theorem thm_len_insert_sorted ~leq x l =
   List.length (List.insert_sorted ~leq x l) = List.length l + 1
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_len_sort ~leq l = List.length (sort ~leq l) = List.length l
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_len_sort ~leq l = List.length (sort ~leq l) = List.length l
+  [@@by auto] [@@rw]
 
 let rec group_by_aux ~key_fn ~merge_vals_fn al l =
   match l with

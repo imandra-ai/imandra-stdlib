@@ -25,16 +25,16 @@ let rec of_list ~default xs =
     let m = of_list ~default xs in
     add k v m
 
-let to_list m = List.fold_right (fun l k -> get k m :: l) ~base:[] m.keys
+let to_list m = List.fold_right (fun l k -> get k m :: l) m.keys
 
-let thm_map_get_add_id m k v = get k (add k v m) = v
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_map_get_add_id m k v = get k (add k v m) = v
+  [@@by auto] [@@rw]
 
-let thm_insert_stable k x ks = List.mem x ks ==> List.mem x (insert k ks)
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_insert_stable k x ks = List.mem x ks ==> List.mem x (insert k ks)
+  [@@by induct ~on_fun:"insert" ()] [@@rw]
 
-let thm_insert_inserts k ks = List.mem k (insert k ks)
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_insert_inserts k ks = List.mem k (insert k ks)
+  [@@by auto] [@@rw]
 
-let thm_map_key_mem m k v = List.mem k (add k v m).keys
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_map_key_mem m k v = List.mem k (add k v m).keys
+  [@@by auto] [@@rw]

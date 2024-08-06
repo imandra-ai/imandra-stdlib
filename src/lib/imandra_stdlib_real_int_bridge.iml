@@ -5,63 +5,78 @@
    G.Passmore, Imandra
 *)
 
-(* Floor by `counting up.' Note how we get to assume floor's existence in its
-   measure, as we only depend on it for `smaller' instances in the admission!
+(* Floor by `counting up.'
 
-   Also note that this is a function designed principally for reasoning, rather
+   Note that this is a function designed principally for reasoning, rather
    than efficient computation! However, a `bridge' of this form is really
    necessary to connect the (continuous) world of reals to the discrete world of
    ints, with a suitable induction principle.
 *)
 
-let rec floor (x : real) (base : int) : int =
+let rec floor_psd_counting (x : real) (base : int) : int =
   if Real.(x <= 0.0) then
     0
   else (
-    let r = Real.of_int base in
-    if r = x then
+    let base_r = Real.of_int base in
+    if base_r = x then
       base
-    else if Real.(r > x) then
+    else if Real.(base_r > x) then
       base - 1
     else
-      floor x (base + 1)
+      floor_psd_counting x (base + 1)
   )
-  [@@measure Ordinal.of_int (floor x base - base)] [@@auto]
+  [@@measure Ordinal.of_int (Real.to_int x - base)]
+
+let floor_psd_builtin (x:real) (base : int) : int =
+  if Real.(x < 0.) then 0 else Real.to_int x
+
+(* The builtin version of floor trivially satisfies all the theorems,
+   but the induction/waterfall fail on the counting version. *)
+let floor x b = floor_psd_builtin x b
 
 (* Real->Int conversion for `psd' (i.e., >=0) reals *)
 
 let int_of_real_psd (x : real) : int = floor x 0
 
-let rec int_induct n =
-  if n <= 0 then
-    0
-  else
-    int_induct (n - 1)
+theorem thm_floor_psd (x:real) (y: int) = floor x y >= 0
+  [@@by auto] [@@rw] [@@fc]
 
-let thm_floor_psd x y = floor x y >= 0
-  [@@induct_term int_induct y] [@@rw] [@@imandra_theorem] [@@fc]
+theorem thm_floor_mono_low (x:real) (y:real)  =
+  Real.(x <= y) ==> Real.to_int x <= Real.to_int y [@@fc] [@@rw]
 
-let thm_floor_mono x y b =
+(* instance (fun (x:real) -> Real.(x > 0.) && floor x 0 <> Real.to_int x);; *)
+
+theorem thm_floor_eq (x:real) (b:int) =
+  (Real.(x >= 0.) && b = 0) ==> floor x b = Real.to_int x
+  (* [@@by induct ~on_fun:"floor" ()] *)
+
+(* eval(floor Real.(1./2.) 1);
+eval(floor Real.(3./2.) 1); *)
+
+(* instance (fun (x:real) (b:int) -> x = Real.(1./2.) && b = 0 && floor x b <> 0);;
+instance (fun (x:real) (b:int) -> x = 1. && b = 0 && floor x b <> 1);; *)
+
+theorem thm_floor_mono (x:real) (y:real) (b:int) =
   Real.(x <= y && x >= 0. && y >= 0.) ==> floor x b <= floor y b
-  [@@induct_term int_induct b] [@@rw] [@@imandra_theorem] [@@fc]
+  [@@by auto] [@@rw] [@@fc]
 
-let thm_int_of_real_psd_psd x = int_of_real_psd x >= 0
-  [@@auto] [@@rw] [@@imandra_theorem] [@@fc]
+theorem thm_int_of_real_psd_psd x = int_of_real_psd x >= 0
+  [@@by auto] [@@rw] [@@fc]
 
-let thm_int_of_real_psd_mono x y =
+theorem thm_int_of_real_psd_mono x y =
   Real.(x <= y && x >= 0. && y >= 0.)
   ==> (int_of_real_psd x <= int_of_real_psd y) [@trigger]
-  [@@auto] [@@apply thm_floor_mono x y 0] [@@rw] [@@imandra_theorem] [@@fc]
+  [@@by auto] [@@by using (quote_term (thm_floor_mono x y 0))] [@@rw] [@@fc]
 
-let thm_inc_by_one_bigger_floor x b =
+theorem thm_inc_by_one_bigger_floor x b =
   Real.(x >= 0. && Real.of_int b <= x) ==> floor Real.(x + 1.0) b > floor x b
-  [@@auto] [@@rw] [@@imandra_theorem] [@@fc]
+  [@@by auto] [@@rw] [@@fc]
 
-let thm_inc_by_one_bigger_conv x =
+theorem thm_inc_by_one_bigger_conv x =
   Real.(x >= 0.)
   ==> int_of_real_psd Real.(x + 1.0)
   > (int_of_real_psd x [@trigger])
-  [@@apply thm_inc_by_one_bigger_floor x 0] [@@auto] [@@fc] [@@imandra_theorem]
+  [@@by using (quote_term (thm_inc_by_one_bigger_floor x 0))] [@@by auto] [@@fc]
 
 [@@@disable int_of_real_psd]
 
@@ -69,19 +84,19 @@ let thm_inc_by_one_bigger_conv x =
    Note we add the explicit additional termination condition of
    `(i < 0. || j < 0.)' as we want to keep everything PSD. *)
 
-(* let rec example (i:real) (j:real) =
- *   let open Real in
- *   let dec i j =
- *     if j <= 0. then (i-1.,j) else (i,j-1.)
- *   in
- *   if (i <= 0. && j <= 0.) || (i < 0. || j < 0.) then (
- *     1.
- *   ) else (
- *     let i', j' = dec i j in
- *     example i' j'
- *   )
- * [@@measure
- *   Ordinal.pair
- *     (Ordinal.of_int (int_of_real_psd i))
- *     (Ordinal.of_int (int_of_real_psd j))]
- * [@@auto] *)
+let rec example (i:real) (j:real) =
+   let open Real in
+   let dec i j =
+     if j <= 0. then (i-1.,j) else (i,j-1.)
+   in
+   if (i <= 0. && j <= 0.) || (i < 0. || j < 0.) then (
+     1.
+   ) else (
+     let i', j' = dec i j in
+     example i' j'
+   )
+ [@@measure
+   Ordinal.pair
+     (Ordinal.of_int (int_of_real_psd i))
+     (Ordinal.of_int (int_of_real_psd j))]
+ [@@by auto]

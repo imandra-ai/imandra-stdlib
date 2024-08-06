@@ -24,9 +24,9 @@ let rec to_list (u : 'a universe) (s : 'a Set.t) : 'a list =
 
 (* The fundamental lemma for projection into a universe *)
 
-let thm_mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+theorem thm_mem_to_list (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   List.mem x (to_list u s) = (Set.mem x s && List.mem x u)
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by induct ~on_fun:"to_list" ()] [@@rw];;
 
 (* A choice function *)
 
@@ -35,86 +35,86 @@ let choose (u : 'a universe) (s : 'a Set.t) : 'a option =
   | [] -> None
   | x :: _ -> Some x
 
-let thm_choose_mem (u : 'a universe) (s : 'a Set.t) =
+theorem thm_choose_mem (u : 'a universe) (s : 'a Set.t) =
   match choose u s with
   | None -> true
   | Some x -> Set.mem x s
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
 let choose_empty (u : 'a universe) (s : 'a Set.t) (x : 'a) =
   choose u s = None && List.mem x u ==> not (Set.mem x s)
-  [@@auto]
+  [@@by auto]
 
 (* Algebraic laws of membership - all automatic via
    our u-projective workhorse, `mem_to_list`! *)
 
-let thm_mem_union u x a b =
+theorem thm_mem_union u x a b =
   List.mem x (to_list u @@ Set.union a b)
   = (List.mem x u && (Set.mem x a || Set.mem x b))
-  [@@auto] [@@imandra_theorem]
+  [@@by auto]
 
-let thm_mem_inter u x a b =
+theorem thm_mem_inter u x a b =
   List.mem x (to_list u @@ Set.inter a b)
   = (List.mem x u && Set.mem x a && Set.mem x b)
-  [@@auto] [@@imandra_theorem]
+  [@@by auto]
 
-let thm_mem_diff u x a b =
+theorem thm_mem_diff u x a b =
   List.mem x (to_list u @@ Set.diff a b)
   = (List.mem x u && Set.mem x a && not (Set.mem x b))
-  [@@auto] [@@imandra_theorem]
+  [@@by auto]
 
 (* Bridged size / cardinality *)
 
 let size (u : 'a universe) (s : 'a Set.t) = List.length (to_list u s)
 
-let thm_size_psd (u : 'a universe) (a : 'a Set.t) = size u a >= 0
-  [@@auto] [@@fc] [@@imandra_theorem]
+theorem thm_size_psd (u : 'a universe) (a : 'a Set.t) = size u a >= 0
+  [@@by auto] [@@fc]
 
-let thm_size_union (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+theorem thm_size_union (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) = size u a + size u b - size u (Set.inter a b)
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+theorem thm_size_inter (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   (size u (Set.inter a b) [@trigger])
   = size u a + size u b - size u (Set.union a b)
-  [@@auto] [@@imandra_theorem]
+  [@@by auto]
 
-let thm_size_union_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+theorem thm_size_union_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.union a b) <= size u a + size u b
-  [@@auto] [@@fc] [@@imandra_theorem]
+  [@@by auto] [@@fc]
 
-let thm_size_inter_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
+theorem thm_size_inter_ub (u : 'a universe) (a : 'a Set.t) (b : 'a Set.t) =
   size u (Set.inter a b) <= size u a + size u b
-  [@@auto] [@@apply thm_size_inter u a b] [@@fc] [@@imandra_theorem]
+  [@@by auto] [@@by apply thm_size_inter u a b] [@@fc]
 
-let thm_size_inter_lt_union u a b =
+theorem thm_size_inter_lt_union u a b =
   size u (Set.inter a b) <= size u (Set.union a b)
-  [@@auto] [@@apply thm_size_inter u a b] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@by apply thm_size_inter u a b] [@@rw]
 
-let thm_size_empty (u : 'a universe) (s : 'a Set.t) =
+theorem thm_size_empty (u : 'a universe) (s : 'a Set.t) =
   Set.is_empty s ==> size u s = 0
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
 (* FIXME: re-prove that
    (* Note: we don't have `_ = size u s + 1` as universes may have duplicates! *)
    let size_add_fresh (u : 'a universe) (x : 'a) (s : 'a Set.t) =
      not (Set.mem x s) && List.mem x u ==> size u (Set.add x s) > size u s
-   [@@auto] [@@rw] [@@imandra_theorem] ;;
+   [@@by auto] [@@rw] ;;
 *)
 
-let thm_size_add_eq (u : 'a universe) (x : 'a) (s : 'a Set.t) =
+theorem thm_size_add_eq (u : 'a universe) (x : 'a) (s : 'a Set.t) =
   Set.mem x s && List.mem x u ==> size u (Set.add x s) = size u s
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
-let thm_size_diff u a b =
+theorem thm_size_diff u a b =
   size u (Set.diff a b) = size u a - size u (Set.inter a b)
-  [@@auto] [@@rw] [@@imandra_theorem]
+  [@@by auto] [@@rw]
 
 (* The size of a 'projected' set is always bounded by the
    size of its universe. *)
 
-let thm_size_bounded u a = size u a <= List.length u
-  [@@auto] [@@rw] [@@imandra_theorem]
+theorem thm_size_bounded u a = size u a <= List.length u
+  [@@by auto] [@@rw]
 
 [@@@disable size]
 
@@ -143,13 +143,13 @@ let thm_size_bounded u a = size u a <= List.length u
  * verify (fun u s s' x ->
  *   Set.mem x s && Set.mem x s' && List.mem x u
  *   ==> List.mem x (to_list u @@ Set.inter s s')
- * ) [@@auto] ;;
+ * ) [@@by auto] ;;
  *
  * verify (fun u s s' x ->
  *   List.mem x (to_list u Set.(inter s s'))
  *    = (List.mem x (to_list u s) &&
  *       List.mem x (to_list u s'))
- * ) [@@auto];;
+ * ) [@@by auto];;
  *
  * verify (fun u a b x ->
  *   let to_list = to_list u in
@@ -157,7 +157,7 @@ let thm_size_bounded u a = size u a <= List.length u
  *   && List.mem x (to_list a)
  *   ==>
  *   List.mem x (to_list b)
- * ) [@@auto] ;;
+ * ) [@@by auto] ;;
  *
  * verify (fun u a b c d x y ->
  *   let to_list = to_list u in
@@ -166,7 +166,7 @@ let thm_size_bounded u a = size u a <= List.length u
  *   && List.mem x (to_list a)
  *   ==>
  *   x = y
- * ) [@@auto] ;;
+ * ) [@@by auto] ;;
  *
  * verify (fun u a b c d x y ->
  *   let to_list = to_list u in
@@ -176,7 +176,7 @@ let thm_size_bounded u a = size u a <= List.length u
  *   && y >= x && x >= y
  *   ==>
  *   List.mem y (to_list d)
- * ) [@@auto]
+ * ) [@@by auto]
  *
  * verify (fun u a b c d x y ->
  *   let to_list = to_list u in
@@ -186,7 +186,7 @@ let thm_size_bounded u a = size u a <= List.length u
  *   && y < x+1 && y > x-1
  *   ==>
  *   List.mem y (to_list d)
- * ) [@@auto];;
+ * ) [@@by auto];;
  *
  * verify (fun u u' a b c x ->
  *   let to_list_u = to_list u in
@@ -195,4 +195,5 @@ let thm_size_bounded u a = size u a <= List.length u
  *   && List.mem x (to_list_u' a)
  *   ==>
  *   List.mem x u && List.mem x u'
- * ) [@@auto] ;; *)
+ * ) [@@by auto] ;; *)
+
