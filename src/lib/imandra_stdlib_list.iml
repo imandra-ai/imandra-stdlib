@@ -59,6 +59,10 @@ let thm_forall_exists u e xs =
      | None -> false
   [@@auto] [@@fc] [@@imandra_theorem]
 
+let thm_forall_preserved_by_append p xs ys =
+  List.for_all p (xs @ ys) = (List.for_all p xs && List.for_all p ys)
+  [@@auto] [@@rw] [@@imandra_theorem]
+
 let sort ~leq =
   List.fold_right (fun x acc -> List.insert_sorted ~leq x acc) ~base:[]
 
