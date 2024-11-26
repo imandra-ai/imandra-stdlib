@@ -1,0 +1,31 @@
+type t = LString.t
+
+let rec split_on_first_sep ~by:(s1 : t) (s2 : t) : t * t =
+  let len = LString.length s1 in
+  if LString.prefix s1 s2 then
+    [], LString.sub s2 len (LString.length s2 - len)
+  else (
+    match s2 with
+    | [] -> [], []
+    | s2h :: s2t ->
+      let s, s2' = split_on_first_sep ~by:s1 s2t in
+      s2h :: s, s2'
+  )
+
+let rec split_on_string ~by:(s1 : t) (s2 : t) : t List.t =
+  match s1 with
+  | [] -> [ s2 ]
+  | _ ->
+    if not (LString.contains ~sub:s1 s2) then
+      [ s2 ]
+    else (
+      let s, s2' = split_on_first_sep ~by:s1 s2 in
+      s :: split_on_string ~by:s1 s2'
+    )
+  [@@measure Ordinal.of_int (List.length s2)]
+
+let thm_recombine (s1 : t) (s2 : t) : bool =
+  let ss = split_on_string ~by:s1 s2 in
+  let s2' = LString.concat s1 ss in
+  s2' = s2
+  [@@auto] [@@rw] [@@imandra_theorem]

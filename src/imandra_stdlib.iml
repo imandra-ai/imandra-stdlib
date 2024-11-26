@@ -16,6 +16,8 @@
 
 [@@@import "lib/imandra_stdlib_iter_map.iml"]
 
+[@@@import "lib/imandra_stdlib_lstring.iml"]
+
 module List = Imandra_stdlib_list
 module Compare = Imandra_stdlib_compare
 module Option = Imandra_stdlib_option
@@ -24,3 +26,4 @@ module Iter_map = Imandra_stdlib_iter_map
 module Set_bridge = Imandra_stdlib_set_bridge
 module Multi_models = Imandra_stdlib_multi_models
 module Real_int_bridge = Imandra_stdlib_real_int_bridge
+module LString = Imandra_stdlib_lstring
